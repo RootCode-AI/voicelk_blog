@@ -224,6 +224,20 @@ The function must include `client/dist/index.html`; the configuration already de
 this. Deploying only the static `client` folder bypasses server SEO and article status
 codes. On standalone hosting, run `npm run build` and `npm start`.
 
+Vercel uses `npm ci --include=dev --include=optional` for the build installation.
+Keep these flags: the OG-image generator imports the build-only `sharp` dependency,
+and Sharp uses platform-specific optional packages. Plain `npm ci` can omit dev
+dependencies when `NODE_ENV=production` or npm omit settings are present, causing
+`ERR_MODULE_NOT_FOUND: Cannot find package 'sharp'` during `prebuild`. Keep production
+mode enabled; explicitly include build dependencies instead. See
+[npm's include/omit behaviour](https://docs.npmjs.com/cli/v11/commands/npm-ci/#include).
+No dependency version or lockfile change is required for this installation fix.
+
+If this error occurs, push the updated `vercel.json` and deploy that new commit.
+Confirm the build log's install command contains both include flags. The repository
+pins Node 22; set the Vercel project's Node version to 22.x to remove the harmless
+warning about a conflicting project default. That warning is not the Sharp error.
+
 Run `npm run test:seo` and `npm run build` before deploying. After deploying:
 
 1. View page source for a published `/blog/<slug>`: its title, canonical URL and body

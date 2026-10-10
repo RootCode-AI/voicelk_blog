@@ -18,6 +18,16 @@ import { sanitizeBlocks } from '../src/lib/blocks.js';
 import { sanitizeAnalyticsEvent } from '../../client/src/lib/analytics.js';
 
 const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
+test('Vercel installs the build-only image dependency and its optional platform packages', async () => {
+  const config = JSON.parse(await readFile(new URL('../../vercel.json', import.meta.url), 'utf8'));
+  const manifest = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8'));
+  const lock = JSON.parse(await readFile(new URL('../../package-lock.json', import.meta.url), 'utf8'));
+  assert.match(config.installCommand, /--include=dev\b/);
+  assert.match(config.installCommand, /--include=optional\b/);
+  assert.ok(manifest.devDependencies.sharp);
+  assert.equal(lock.packages[''].devDependencies.sharp, manifest.devDependencies.sharp);
+  assert.ok(lock.packages['node_modules/sharp']);
+});
 const post = {
   title: 'Sinhala & English speech', slug: 'sinhala-english', excerpt: 'A bilingual speech experiment.',
   publishedAt: '2026-10-01T00:00:00.000Z', updatedAt: '2026-10-08T00:00:00.000Z',
