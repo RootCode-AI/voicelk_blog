@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { Loader2 } from 'lucide-react';
 import { api } from '../lib/api.js';
+import Seo from '../components/Seo.jsx';
 
 const COPY = {
   confirm: {
@@ -37,6 +38,7 @@ export default function NewsletterAction({ action }) {
 
   return (
     <div className="mx-auto flex min-h-[80dvh] max-w-xl flex-col items-center justify-center px-4 text-center">
+      <Seo title="Newsletter preference" path={`/newsletter/${action}`} noIndex />
       {state.status === 'loading' && <Loader2 className="size-6 animate-spin text-muted" />}
       {state.status === 'done' && (
         <>

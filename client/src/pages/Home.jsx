@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUpRight, FolderGit2 } from 'lucide-react';
 import Hero from '../components/Hero.jsx';
 import NewsletterForm from '../components/NewsletterForm.jsx';
 import PostRow, { PostRowSkeleton } from '../components/PostRow.jsx';
+import Seo from '../components/Seo.jsx';
 import { Reveal, RevealGroup, fadeUp } from '../components/motion/Reveal.jsx';
 import { useSmoothScroll } from '../components/motion/SmoothScroll.jsx';
 import { useApi } from '../hooks/useApi.js';
@@ -159,6 +160,19 @@ export default function Home() {
 
   return (
     <>
+      <Seo
+        title="VoiceLK Journal — Sinhala-English TTS Research"
+        description={site.description}
+        path="/"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'ResearchProject',
+          name: 'VoiceLK',
+          url: site.url,
+          description: site.description,
+          parentOrganization: { '@type': 'CollegeOrUniversity', name: site.university },
+        }}
+      />
       <Hero />
       <LatestPosts />
       <Pipeline />

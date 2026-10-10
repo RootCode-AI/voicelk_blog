@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Loader2, Send } from 'lucide-react';
 import { Reveal, fadeUp, stagger } from '../components/motion/Reveal.jsx';
+import Seo from '../components/Seo.jsx';
 import { api } from '../lib/api.js';
 import { site } from '../site.config.js';
 
@@ -71,7 +72,11 @@ function ContactForm() {
 export default function About() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-[clamp(4rem,8vw,8rem)] pt-36 sm:px-6 md:pt-44">
-      <motion.header initial="hidden" animate="show" variants={stagger()} className="max-w-3xl">
+      <Seo
+        title="About the VoiceLK Project"
+        description="Meet VoiceLK, a Rajarata University final-year research project building natural Sinhala-English code-switched text-to-speech."
+        path="/about"
+      />      <motion.header initial="hidden" animate="show" variants={stagger()} className="max-w-3xl">
         <motion.p variants={fadeUp} className="eyebrow mb-4">About</motion.p>
         <motion.h1 variants={fadeUp} className="font-serif text-[clamp(3rem,8vw,5.5rem)] leading-[0.95] tracking-[-0.02em]">
           A voice for the way <em className="text-slate">Sri Lanka talks.</em>

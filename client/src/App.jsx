@@ -1,8 +1,10 @@
 import { Suspense, lazy } from 'react';
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router';
+import { Analytics } from '@vercel/analytics/react';
 import { Loader2 } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
+import Seo from './components/Seo.jsx';
 import About from './pages/About.jsx';
 import Blog from './pages/Blog.jsx';
 import Home from './pages/Home.jsx';
@@ -42,6 +44,7 @@ function Root() {
 function AdminRoot() {
   return (
     <AuthProvider>
+      <Seo title="Administration" path="/admin" noIndex />
       <Outlet />
     </AuthProvider>
   );
@@ -89,5 +92,10 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Analytics />
+    </>
+  );
 }

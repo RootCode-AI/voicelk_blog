@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Check, Link2 } from 'lucide-react';
 import NewsletterForm from '../components/NewsletterForm.jsx';
 import Portal from '../components/Portal.jsx';
 import PostArticle from '../components/PostArticle.jsx';
+import Seo from '../components/Seo.jsx';
 import { Reveal } from '../components/motion/Reveal.jsx';
 import { useSmoothScroll } from '../components/motion/SmoothScroll.jsx';
 import { useApi } from '../hooks/useApi.js';
@@ -48,13 +49,6 @@ export default function Post() {
   const { scrollToId } = useSmoothScroll();
   const post = data?.post;
 
-  useEffect(() => {
-    if (post) document.title = `${post.title} — ${site.title}`;
-    return () => {
-      document.title = site.title;
-    };
-  }, [post]);
-
   // Deep links to a heading (#section) land on it once the body has rendered.
   useEffect(() => {
     if (!post || !window.location.hash) return undefined;
@@ -67,6 +61,36 @@ export default function Post() {
 
   return (
     <div className="pb-[clamp(4rem,8vw,8rem)] pt-36 md:pt-44">
+      <Seo
+        title={post?.title ?? 'Research note'}
+        description={post?.excerpt || site.description}
+        path={`/blog/${slug}`}
+        image={post?.coverImage?.url ? mediaUrl(post.coverImage.url) : undefined}
+        type={post ? 'article' : 'website'}
+        noIndex={!post}
+        publishedTime={post?.publishedAt}
+        modifiedTime={post?.updatedAt}
+        author={post?.author || 'VoiceLK Research Team'}
+        tags={post?.tags ?? []}
+        jsonLd={
+          post
+            ? {
+                '@context': 'https://schema.org',
+                '@type': 'BlogPosting',
+                headline: post.title,
+                description: post.excerpt || site.description,
+                url: `${site.url}/blog/${post.slug}`,
+                mainEntityOfPage: `${site.url}/blog/${post.slug}`,
+                datePublished: post.publishedAt,
+                dateModified: post.updatedAt || post.publishedAt,
+                author: { '@type': 'Person', name: post.author || 'VoiceLK Research Team' },
+                publisher: { '@type': 'Organization', name: 'VoiceLK Research Team', url: site.url },
+                keywords: post.tags?.join(', '),
+                ...(post.coverImage?.url && { image: new URL(mediaUrl(post.coverImage.url), site.url).href }),
+              }
+            : undefined
+        }
+      />
       <ReadingProgress />
       {loading && (
         <div className="mx-auto max-w-3xl space-y-5 px-4">

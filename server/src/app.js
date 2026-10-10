@@ -73,6 +73,33 @@ app.use(async (_req, _res, next) => {
   }
 });
 
+function escapeXml(value) {
+  return String(value).replace(/[<>&'\"]/g, (character) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[character]);
+}
+
+app.get('/api/sitemap', async (_req, res) => {
+  const posts = await Post.find({ status: 'published' }).select('slug publishedAt updatedAt').sort({ publishedAt: -1 }).lean();
+  const staticUrls = [
+    { path: '/', priority: '1.0', changefreq: 'weekly' },
+    { path: '/blog', priority: '0.9', changefreq: 'weekly' },
+    { path: '/about', priority: '0.6', changefreq: 'monthly' },
+  ];
+  const urls = [
+    ...staticUrls.map(
+      ({ path, priority, changefreq }) =>
+        `<url><loc>${escapeXml(`${config.publicUrl}${path}`)}</loc><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`,
+    ),
+    ...posts.map((post) => {
+      const lastModified = post.updatedAt ?? post.publishedAt;
+      return `<url><loc>${escapeXml(`${config.publicUrl}/blog/${post.slug}`)}</loc>${
+        lastModified ? `<lastmod>${new Date(lastModified).toISOString()}</lastmod>` : ''
+      }<changefreq>monthly</changefreq><priority>0.8</priority></url>`;
+    }),
+  ];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>`;
+  res.set({ 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400' });
+  res.send(xml);
+});
 app.get('/api/health', (_req, res) => res.json({ ok: true, mail: mailEnabled ? 'resend' : 'console' }));
 
 app.get('/api/stats', async (_req, res) => {
