@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 const subscriberSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    // Double opt-in: an address only receives posts after clicking the confirmation link.
-    status: { type: String, enum: ['pending', 'active', 'unsubscribed'], default: 'pending' },
+    // New subscribers become active immediately; pending remains for legacy confirmation links.
+    status: { type: String, enum: ['pending', 'active', 'unsubscribed'], default: 'active' },
     confirmToken: { type: String, index: true, sparse: true },
     unsubscribeToken: { type: String, required: true, index: true },
     confirmedAt: { type: Date },

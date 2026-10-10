@@ -35,8 +35,10 @@ export default function Hero() {
         <div className="absolute inset-0 bg-linear-to-b from-transparent from-[26.416%] to-paper to-[66.943%]" />
       </motion.div>
 
+      {/* The design's 290px editorial top padding on tall screens, shrinking with the
+          viewport height so the headline and subscribe field fit the first screen on laptops. */}
       <motion.div
-        className="mx-auto flex max-w-5xl flex-col items-center px-4 pb-24 pt-36 text-center sm:px-6 md:pt-52 lg:pt-[290px]"
+        className="mx-auto flex max-w-5xl flex-col items-center px-4 pb-[max(4rem,10dvh)] pt-32 text-center sm:px-6 md:pt-[max(6rem,min(290px,27dvh))]"
         initial="hidden"
         animate="show"
         variants={stagger(0.1)}
@@ -66,26 +68,26 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        <h1 className="mt-8">
+        <h1 className="mt-[min(2rem,3.5dvh)]">
           <motion.span
             variants={fadeUp}
-            className="block text-[clamp(2.6rem,7vw,5rem)] font-medium leading-[1.02] tracking-[-0.045em] text-ink"
+            className="block text-[clamp(2.6rem,min(7vw,9dvh),5rem)] font-medium leading-[1.02] tracking-[-0.045em] text-ink"
           >
             Teaching a voice to speak
           </motion.span>
           <motion.span
             variants={fadeUp}
-            className="mt-1 block font-serif text-[clamp(3rem,9vw,6.25rem)] italic leading-[0.95] tracking-[-0.02em] text-slate"
+            className="mt-1 block font-serif text-[clamp(3rem,min(9vw,11.5dvh),6.25rem)] italic leading-[0.95] tracking-[-0.02em] text-slate"
           >
             Sinhala &amp; English.
           </motion.span>
         </h1>
 
-        <motion.p variants={fadeUp} className="mt-8 max-w-xl text-[17px] leading-relaxed text-muted">
+        <motion.p variants={fadeUp} className="mt-[min(2rem,3.5dvh)] max-w-xl text-[17px] leading-relaxed text-muted">
           {site.tagline}
         </motion.p>
 
-        <motion.div variants={fadeUp} className="mt-10 w-full max-w-md" id="subscribe">
+        <motion.div variants={fadeUp} className="mt-[min(2.5rem,4.5dvh)] w-full max-w-md" id="subscribe">
           <NewsletterForm />
         </motion.div>
 

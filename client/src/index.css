@@ -214,6 +214,8 @@
   font-size: 1.0625rem;
   line-height: 1.75;
   color: var(--color-slate);
+  /* Long URLs and identifiers wrap instead of running off narrow screens. */
+  overflow-wrap: anywhere;
 }
 .prose-voice > * + * {
   margin-top: 1.1em;

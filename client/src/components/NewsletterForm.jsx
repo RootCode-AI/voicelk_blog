@@ -55,7 +55,7 @@ export default function NewsletterForm({ className = '', onDark = false }) {
           ) : (
             <ArrowRight className="size-4" />
           )}
-          <span className="hidden sm:inline">Subscribe</span>
+          <span className="hidden sm:inline">{state.status === 'done' ? 'Subscribed' : 'Subscribe'}</span>
         </motion.button>
       </form>
       <AnimatePresence mode="wait">
