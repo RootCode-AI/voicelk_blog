@@ -2,16 +2,19 @@
 // Fill in the repository links and team once they are ready — cards with an
 // empty url render as "link coming soon" instead of a dead link.
 
+import { seoSite } from '../../shared/seo.js';
+
 export const site = {
   name: 'VoiceLK',
   title: 'VoiceLK Journal',
-  url: 'https://voicelk.dev',
+  url: seoSite.url,
+  seoTitle: seoSite.title,
   description:
     'Research on Sinhala-English code-switched text-to-speech, including text normalisation, grapheme-to-phoneme conversion, VITS training and evaluation.',
   tagline:
     'Research notes from a final-year project on Sinhala–English code-switched speech synthesis — from text normalisation and G2P to training VITS and serving it.',
   university: 'Rajarata University of Sri Lanka',
-  contactEmail: '',
+  contactEmail: 'rootcode.projects@gmail.com',
 
   repos: [
     {

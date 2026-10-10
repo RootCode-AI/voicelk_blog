@@ -3,6 +3,7 @@ import { Post } from '../models/Post.js';
 import { blocksToText, readingMinutes, sanitizeBlocks } from '../lib/blocks.js';
 import { HttpError, badRequest, notFound } from '../lib/errors.js';
 import { notifySubscribers } from '../lib/notify.js';
+import { assertPublishedImageAlt } from '../lib/imageAlt.js';
 
 const router = Router();
 
@@ -55,6 +56,7 @@ async function applyBody(post, body) {
     if (post.status === 'published' && !post.publishedAt) post.publishedAt = new Date();
   }
 
+  assertPublishedImageAlt(post);
   const requestedSlug = body.slug !== undefined ? slugify(body.slug) : undefined;
   if (requestedSlug || !post.slug) {
     post.slug = await uniqueSlug(requestedSlug || slugify(post.title), post._id);

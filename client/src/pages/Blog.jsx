@@ -14,12 +14,13 @@ export default function Blog() {
   const [params, setParams] = useSearchParams();
   const tag = params.get('tag') ?? '';
   const q = params.get('q') ?? '';
+  const requestedPage = Math.min(10000, Math.max(1, Number.parseInt(params.get('page'), 10) || 1));
   const [draft, setDraft] = useState(q);
   const [pages, setPages] = useState({ key: '', posts: [], page: 0, total: 0, pagesTotal: 1 });
   const [loadingMore, setLoadingMore] = useState(false);
 
   const { data: tagData } = useApi('/posts/tags');
-  const query = new URLSearchParams({ limit: String(PAGE_SIZE), ...(tag && { tag }), ...(q && { q }) }).toString();
+  const query = new URLSearchParams({ limit: String(PAGE_SIZE), page: String(requestedPage), ...(tag && { tag }), ...(q && { q }) }).toString();
   const { data, loading, error } = useApi(`/posts?${query}`);
 
   // Search as the reader types, a moment after they stop.
@@ -27,6 +28,7 @@ export default function Blog() {
     const timer = setTimeout(() => {
       if (draft.trim() === q) return;
       const next = new URLSearchParams(params);
+      next.delete('page');
       if (draft.trim()) next.set('q', draft.trim());
       else next.delete('q');
       setParams(next, { replace: true });
@@ -34,13 +36,15 @@ export default function Blog() {
     return () => clearTimeout(timer);
   }, [draft, q, params, setParams]);
 
-  const firstPage = data && pages.key !== query ? { posts: data.posts, total: data.total, pagesTotal: data.pages, page: 1 } : pages;
+  const firstPage = data && pages.key !== query ? { posts: data.posts, total: data.total, pagesTotal: data.pages, page: data.page } : pages;
   const posts = firstPage.posts;
 
   async function loadMore() {
     setLoadingMore(true);
     try {
-      const next = await api.get(`/posts?${query}&page=${firstPage.page + 1}`);
+      const nextParams = new URLSearchParams(query);
+      nextParams.set('page', String(firstPage.page + 1));
+      const next = await api.get(`/posts?${nextParams}`);
       setPages({ key: query, posts: [...posts, ...next.posts], page: next.page, total: next.total, pagesTotal: next.pages });
     } finally {
       setLoadingMore(false);
@@ -49,6 +53,7 @@ export default function Blog() {
 
   function selectTag(value) {
     const next = new URLSearchParams(params);
+    next.delete('page');
     if (value && value !== tag) next.set('tag', value);
     else next.delete('tag');
     setParams(next);
@@ -57,9 +62,9 @@ export default function Blog() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-[clamp(4rem,8vw,8rem)] pt-36 sm:px-6 md:pt-44">
       <Seo
-        title="Research Journal"
+        title={requestedPage > 1 ? `Research Journal — Page ${requestedPage}` : 'Research Journal'}
         description="Experiments, design decisions and results from building a Sinhala-English code-switched text-to-speech system."
-        path="/blog"
+        path={requestedPage > 1 && !tag && !q ? `/blog?page=${requestedPage}` : '/blog'}
         noIndex={Boolean(tag || q)}
       />      <motion.header initial="hidden" animate="show" variants={stagger()} className="max-w-3xl">
         <motion.p variants={fadeUp} className="eyebrow mb-4">
@@ -136,10 +141,12 @@ export default function Blog() {
 
       {firstPage.page < firstPage.pagesTotal && (
         <div className="mt-20 flex justify-center">
-          <button onClick={loadMore} className="btn-ghost" disabled={loadingMore}>
+          <a href={`/blog?${new URLSearchParams({ ...(tag && { tag }), ...(q && { q }), page: String(firstPage.page + 1) })}`}
+            onClick={(event) => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (!loadingMore) loadMore(); }}
+            className="btn-ghost" aria-disabled={loadingMore}>
             {loadingMore && <Loader2 className="size-4 animate-spin" />}
             Load more notes
-          </button>
+          </a>
         </div>
       )}
     </div>

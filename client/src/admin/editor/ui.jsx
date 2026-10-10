@@ -87,7 +87,7 @@ export function MediaInput({ kind = 'image', value, onChange, onError, allowUrl 
   if (value) {
     return (
       <div className="relative overflow-hidden rounded-lg border border-line bg-wash">
-        {kind === 'image' && <img src={mediaUrl(value)} alt="" className="max-h-72 w-full object-contain" />}
+        {kind === 'image' && <img src={mediaUrl(value)} alt="Selected image preview" className="max-h-72 w-full object-contain" />}
         {kind === 'audio' && <audio src={mediaUrl(value)} controls className="w-full p-2" />}
         {kind === 'video' && <p className="truncate p-3 pr-12 font-mono text-xs text-slate">{value}</p>}
         <button

@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, Check, Loader2 } from 'lucide-react';
 import { api } from '../lib/api.js';
+import { Link } from 'react-router';
 
 // The pill-shaped subscribe field from the hero: 40px radius, soft shadow,
 // dark CTA nested inside.
@@ -45,6 +46,7 @@ export default function NewsletterForm({ className = '', onDark = false }) {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
           type="submit"
+          aria-label={state.status === 'done' ? 'Subscribed to research updates' : 'Subscribe to research updates'}
           className="btn-dark shrink-0"
           disabled={state.status === 'loading'}
         >
@@ -58,6 +60,7 @@ export default function NewsletterForm({ className = '', onDark = false }) {
           <span className="hidden sm:inline">{state.status === 'done' ? 'Subscribed' : 'Subscribe'}</span>
         </motion.button>
       </form>
+      <p className={`mt-3 px-2 text-xs leading-relaxed ${onDark ? 'text-white/80' : 'text-muted'}`}>Subscribe for research updates. Unsubscribe any time. <Link to="/privacy" className="underline">Privacy Policy</Link></p>
       <AnimatePresence mode="wait">
         {state.message && (
           <motion.p

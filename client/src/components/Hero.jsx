@@ -92,10 +92,11 @@ export default function Hero() {
         </motion.div>
 
         <motion.div variants={fadeUp} className="mt-6">
-          <Link to="/blog" className="group inline-flex items-center gap-1.5 text-sm font-medium text-slate hover:text-ink">
-            Read the journal
+          <Link to="/blog" className="btn-dark group">
+            Read the research
             <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
+          <Link to="/faq" className="btn-ghost ml-3">New here? Start with the FAQ</Link>
         </motion.div>
       </motion.div>
     </section>

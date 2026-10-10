@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { site } from '../site.config.js';
+import { socialImage as getSocialImage, websiteSchema, seoPages } from '../../../shared/seo.js';
 
 function absoluteUrl(value = '/') {
   try {
@@ -39,6 +40,7 @@ export default function Seo({
   description = site.description,
   path = '/',
   image,
+  imageAlt,
   type = 'website',
   noIndex = false,
   publishedTime,
@@ -46,18 +48,22 @@ export default function Seo({
   author,
   tags = [],
   jsonLd,
+  pending = false,
 }) {
   useEffect(() => {
-    const fullTitle = title ? `${title} | ${site.name}` : site.title;
+    if (pending) return;
+    const fullTitle = title ? `${title} | ${site.title}` : site.seoTitle;
     const canonical = absoluteUrl(path);
-    const socialImage = image ? absoluteUrl(image) : '';
+    const social = getSocialImage(image, imageAlt || title);
+    const socialImage = social.url;
 
     document.title = fullTitle;
     document.documentElement.lang = 'en-LK';
     setCanonical(canonical);
 
     setMeta('name', 'description', description);
-    setMeta('name', 'robots', noIndex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
+    const preview = document.head.querySelector('meta[name="voicelk:preview"]')?.content === 'true';
+    setMeta('name', 'robots', noIndex || preview ? 'noindex, follow' : 'index, follow, max-image-preview:large');
     setMeta('property', 'og:title', fullTitle);
     setMeta('property', 'og:description', description);
     setMeta('property', 'og:type', type);
@@ -65,10 +71,26 @@ export default function Seo({
     setMeta('property', 'og:site_name', site.title);
     setMeta('property', 'og:locale', 'en_LK');
     setMeta('property', 'og:image', socialImage);
+    setMeta('property', 'og:image:alt', social.alt);
+    setMeta('property', 'og:image:width', social.width);
+    setMeta('property', 'og:image:height', social.height);
+    setMeta('property', 'og:image:type', social.type);
     setMeta('name', 'twitter:card', socialImage ? 'summary_large_image' : 'summary');
     setMeta('name', 'twitter:title', fullTitle);
     setMeta('name', 'twitter:description', description);
     setMeta('name', 'twitter:image', socialImage);
+    setMeta('name', 'twitter:image:alt', social.alt);
+    let markdown = document.head.querySelector('link[rel="alternate"][type="text/markdown"]');
+    const pathname = path.split('?')[0];
+    if (!noIndex && !preview && (seoPages[pathname] || type === 'article')) {
+      if (!markdown) {
+        markdown = document.createElement('link');
+        markdown.rel = 'alternate';
+        markdown.type = 'text/markdown';
+        document.head.appendChild(markdown);
+      }
+      markdown.href = absoluteUrl(pathname === '/' ? '/index.md' : path.replace(pathname, `${pathname}.md`));
+    } else markdown?.remove();
 
     setMeta('property', 'article:published_time', type === 'article' ? publishedTime : '');
     setMeta('property', 'article:modified_time', type === 'article' ? modifiedTime : '');
@@ -84,18 +106,19 @@ export default function Seo({
     }
 
     let script = document.head.querySelector('script[data-voicelk-seo]');
-    if (jsonLd) {
+    const schema = noIndex || preview ? null : jsonLd || websiteSchema(path, fullTitle);
+    if (schema) {
       if (!script) {
         script = document.createElement('script');
         script.type = 'application/ld+json';
         script.dataset.voicelkSeo = 'true';
         document.head.appendChild(script);
       }
-      script.textContent = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
+      script.textContent = JSON.stringify(schema).replace(/</g, '\\u003c');
     } else {
       script?.remove();
     }
-  }, [author, description, image, jsonLd, modifiedTime, noIndex, path, publishedTime, tags, title, type]);
+  }, [author, description, image, imageAlt, jsonLd, modifiedTime, noIndex, path, pending, publishedTime, tags, title, type]);
 
   return null;
 }

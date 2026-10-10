@@ -178,11 +178,12 @@ export default function BlockFields({ block, onChange, onInsertAfter, onError })
         <div className="space-y-4">
           <MediaInput kind="image" value={data.url} onChange={(url) => set({ url })} onError={onError} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Alt text" hint="Describe the image for screen readers.">
+            <Field label="Alt text" hint="Describe the useful visual information. Required before publishing unless decorative.">
               {(id) => <input id={id} className="field" {...text('alt')} />}
             </Field>
             <Field label="Caption">{(id) => <input id={id} className="field" {...text('caption')} />}</Field>
           </div>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(data.decorative)} onChange={(e) => set({ decorative: e.target.checked })} />Decorative image (no information; empty alt text)</label>
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted">Width</span>
             <Segmented

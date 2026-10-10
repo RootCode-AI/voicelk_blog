@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /newsletter/
+Disallow: /api/
+Allow: /api/media/
 
 Sitemap: https://voicelk.dev/sitemap.xml

@@ -6,21 +6,17 @@
   "outputDirectory": "client/dist",
   "functions": {
     "api/index.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "client/dist/index.html"
     }
   },
-  "rewrites": [
-    {
-      "source": "/sitemap.xml",
-      "destination": "/api/index?__path=sitemap"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api/index?__path=:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+  "routes": [
+    { "src": "/", "dest": "/api/index?__page=" },
+    { "src": "/index\\.html", "status": 308, "headers": { "Location": "/" } },
+    { "src": "/robots\\.txt", "dest": "/api/index?__page=robots.txt" },
+    { "src": "/sitemap\\.xml", "dest": "/api/index?__path=sitemap" },
+    { "src": "/api/(.*)", "dest": "/api/index?__path=$1" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/api/index?__page=$1" }
   ]
 }

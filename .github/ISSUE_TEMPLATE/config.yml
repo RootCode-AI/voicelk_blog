@@ -1,0 +1,15 @@
+{
+  "blank_issues_enabled": true,
+  "contact_links": [
+    {
+      "name": "Report a security vulnerability privately",
+      "url": "https://github.com/RootCode-AI/voicelk_blog/security/policy",
+      "about": "Read SECURITY.md and email rootcode.projects@gmail.com. Do not disclose vulnerabilities in public issues."
+    },
+    {
+      "name": "Private conduct or accessibility report",
+      "url": "mailto:rootcode.projects@gmail.com",
+      "about": "Contact the maintainers without opening a public issue."
+    }
+  ]
+}

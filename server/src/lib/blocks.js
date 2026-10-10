@@ -22,6 +22,7 @@ const shapes = {
   image: (d) => ({
     url: url(d.url),
     alt: str(d.alt, 300),
+    decorative: d.decorative === true,
     caption: str(d.caption, 600),
     width: oneOf(d.width, ['normal', 'wide', 'full'], 'normal'),
   }),

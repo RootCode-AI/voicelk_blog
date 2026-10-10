@@ -8,13 +8,15 @@
     "client"
   ],
   "scripts": {
+    "test:seo": "node --test server/tests/seo.test.js",
     "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm start -w server",
     "create-admin": "npm run create-admin -w server --"
   },
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "concurrently": "^10.0.5",
+    "sharp": "^0.35.5"
   },
   "version": "1.0.0",
   "main": "server/src/index.js",

@@ -18,6 +18,10 @@ export default function Footer() {
             <li><Link to="/blog" className="text-slate hover:text-ink">All notes</Link></li>
             <li><Link to="/#project" className="text-slate hover:text-ink">The pipeline</Link></li>
             <li><Link to="/about" className="text-slate hover:text-ink">About &amp; contact</Link></li>
+            <li><Link to="/faq" className="text-slate hover:text-ink">Frequently asked questions</Link></li>
+            <li><Link to="/privacy" className="text-slate hover:text-ink">Privacy Policy</Link></li>
+            <li><Link to="/terms" className="text-slate hover:text-ink">Terms of Use</Link></li>
+            <li><button className="text-slate hover:text-ink" onClick={() => window.dispatchEvent(new Event('voicelk:analytics-preferences'))}>Analytics preferences</button></li>
           </ul>
         </div>
         <div>

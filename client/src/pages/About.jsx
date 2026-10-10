@@ -5,6 +5,7 @@ import { Reveal, fadeUp, stagger } from '../components/motion/Reveal.jsx';
 import Seo from '../components/Seo.jsx';
 import { api } from '../lib/api.js';
 import { site } from '../site.config.js';
+import { Link } from 'react-router';
 
 function ContactForm() {
   const [form, setForm] = useState({ name: '', email: '', message: '', website: '' });
@@ -65,6 +66,7 @@ function ContactForm() {
         {state.status === 'sending' ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         Send message
       </button>
+      <p className="text-xs leading-relaxed text-muted">We use your name, email and message to respond to this enquiry. <Link to="/privacy" className="underline">Read our Privacy Policy</Link>.</p>
     </form>
   );
 }
@@ -112,7 +114,7 @@ export default function About() {
         </section>
       )}
 
-      <section className="mt-24 grid gap-10 md:grid-cols-[1fr_1.3fr]">
+      <section id="contact" className="mt-24 scroll-mt-24 grid gap-10 md:grid-cols-[1fr_1.3fr]">
         <Reveal>
           <h2 className="font-serif text-[clamp(2.25rem,5vw,3.25rem)] leading-[1.02]">
             Say <em>hello</em>
@@ -120,6 +122,7 @@ export default function About() {
           <p className="mt-4 max-w-sm leading-relaxed text-slate">
             Questions about the model, the dataset or the code? Want to lend your voice to a listening test? Write to us.
           </p>
+          <a href={`mailto:${site.contactEmail}`} className="mt-4 inline-block text-sm underline">{site.contactEmail}</a>
         </Reveal>
         <Reveal delay={0.12}>
           <ContactForm />

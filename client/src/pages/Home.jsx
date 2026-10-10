@@ -161,17 +161,8 @@ export default function Home() {
   return (
     <>
       <Seo
-        title="VoiceLK Journal — Sinhala-English TTS Research"
         description={site.description}
         path="/"
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'ResearchProject',
-          name: 'VoiceLK',
-          url: site.url,
-          description: site.description,
-          parentOrganization: { '@type': 'CollegeOrUniversity', name: site.university },
-        }}
       />
       <Hero />
       <LatestPosts />

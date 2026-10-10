@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from './motion/Reveal.jsx';
 import { mediaUrl } from '../lib/api.js';
 import { formatDate } from '../lib/format.js';
+import { imageAlt } from '../../../shared/images.js';
 
 // Posts without a cover image get a typographic one instead of a stock photo.
 export function CoverArt({ post, className = '' }) {
@@ -11,7 +12,7 @@ export function CoverArt({ post, className = '' }) {
     return (
       <img
         src={mediaUrl(post.coverImage.url)}
-        alt={post.coverImage.alt || ''}
+        alt={imageAlt(post.coverImage.alt, `Cover for ${post.title}`)}
         loading="lazy"
         className={`size-full object-cover ${className}`}
       />

@@ -3,6 +3,7 @@ import BlockRenderer, { withHeadingIds } from '../blocks/BlockRenderer.jsx';
 import { fadeUp, stagger } from './motion/Reveal.jsx';
 import { PostMeta } from './PostRow.jsx';
 import { mediaUrl } from '../lib/api.js';
+import { imageAlt } from '../../../shared/images.js';
 
 function Contents({ blocks, onJump }) {
   const headings = withHeadingIds(blocks).filter((b) => b.type === 'heading' && b.data.text && b.data.level <= 3);
@@ -80,7 +81,7 @@ export default function PostArticle({ post, onJump, animate = true }) {
           transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className="mx-auto mt-14 w-[min(67.5rem,calc(100%-2rem))] overflow-hidden rounded-2xl border border-line shadow-card"
         >
-          <img src={mediaUrl(post.coverImage.url)} alt={post.coverImage.alt ?? ''} className="max-h-[36rem] w-full object-cover" />
+          <img src={mediaUrl(post.coverImage.url)} alt={imageAlt(post.coverImage.alt, `Cover for ${post.title}`)} className="max-h-[36rem] w-full object-cover" />
         </motion.div>
       )}
 

@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router';
-import { Analytics } from '@vercel/analytics/react';
+import AnalyticsConsent from './components/AnalyticsConsent.jsx';
+import InfoPage from './pages/InfoPage.jsx';
 import { Loader2 } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
@@ -36,6 +37,7 @@ function Root() {
       <Suspense fallback={<Loading />}>
         <Outlet />
       </Suspense>
+      <AnalyticsConsent />
     </ToastProvider>
   );
 }
@@ -61,6 +63,7 @@ const router = createBrowserRouter([
           { path: '/blog', element: <Blog /> },
           { path: '/blog/:slug', element: <Post /> },
           { path: '/about', element: <About /> },
+          ...['/privacy', '/terms', '/faq'].map((path) => ({ path, element: <InfoPage path={path} /> })),
           { path: '/newsletter/confirm', element: <NewsletterAction action="confirm" /> },
           { path: '/newsletter/unsubscribe', element: <NewsletterAction action="unsubscribe" /> },
           { path: '*', element: <NotFound /> },
@@ -95,7 +98,6 @@ export default function App() {
   return (
     <>
       <RouterProvider router={router} />
-      <Analytics />
     </>
   );
 }

@@ -1,4 +1,6 @@
 import express from 'express';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -15,6 +17,7 @@ import adminPostRoutes from './routes/adminPosts.js';
 import mediaRoutes from './routes/media.js';
 import subscriberRoutes from './routes/subscribers.js';
 import contactRoutes from './routes/contact.js';
+import { createSeoRouter } from './routes/seo.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -64,7 +67,9 @@ app.use(
 );
 app.use(express.json({ limit: '4mb' }));
 app.use(cookieParser());
-app.use(async (_req, _res, next) => {
+app.use('/api', async (_req, _res, next) => {
+  // The sitemap handler owns initialization so outages keep its retryable 503 response.
+  if (_req.path === '/sitemap') return next();
   try {
     await initializeApp();
     next();
@@ -73,33 +78,6 @@ app.use(async (_req, _res, next) => {
   }
 });
 
-function escapeXml(value) {
-  return String(value).replace(/[<>&'\"]/g, (character) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[character]);
-}
-
-app.get('/api/sitemap', async (_req, res) => {
-  const posts = await Post.find({ status: 'published' }).select('slug publishedAt updatedAt').sort({ publishedAt: -1 }).lean();
-  const staticUrls = [
-    { path: '/', priority: '1.0', changefreq: 'weekly' },
-    { path: '/blog', priority: '0.9', changefreq: 'weekly' },
-    { path: '/about', priority: '0.6', changefreq: 'monthly' },
-  ];
-  const urls = [
-    ...staticUrls.map(
-      ({ path, priority, changefreq }) =>
-        `<url><loc>${escapeXml(`${config.publicUrl}${path}`)}</loc><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`,
-    ),
-    ...posts.map((post) => {
-      const lastModified = post.updatedAt ?? post.publishedAt;
-      return `<url><loc>${escapeXml(`${config.publicUrl}/blog/${post.slug}`)}</loc>${
-        lastModified ? `<lastmod>${new Date(lastModified).toISOString()}</lastmod>` : ''
-      }<changefreq>monthly</changefreq><priority>0.8</priority></url>`;
-    }),
-  ];
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>`;
-  res.set({ 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400' });
-  res.send(xml);
-});
 app.get('/api/health', (_req, res) => res.json({ ok: true, mail: mailEnabled ? 'resend' : 'console' }));
 
 app.get('/api/stats', async (_req, res) => {
@@ -127,6 +105,31 @@ app.use('/api/admin/posts', requireAdmin, adminPostRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/contact', contactRoutes);
+// Preserve static asset delivery on standalone hosts. Vercel serves these via CDN.
+const clientDist = fileURLToPath(new URL('../../client/dist/', import.meta.url));
+if (!process.env.VERCEL && fs.existsSync(clientDist)) {
+  app.use('/assets', express.static(`${clientDist}/assets`, { immutable: true, maxAge: '1y' }));
+  app.get('/favicon.svg', (_req, res) => res.sendFile(`${clientDist}/favicon.svg`));
+  app.get('/og-image.png', (_req, res) => res.sendFile(`${clientDist}/og-image.png`, { maxAge: '1h' }));
+}
+app.get('/index.html', (_req, res) => res.redirect(308, '/'));
+app.use(createSeoRouter({
+  async findPost(slug) {
+    await initializeApp();
+    return Post.findOne({ slug, status: 'published' }).lean();
+  },
+  async listPosts({ page, size, q, tag }) {
+    await initializeApp();
+    const filter = { status: 'published', ...(q && { $text: { $search: q } }), ...(tag && { tags: tag }) };
+    const sort = q ? { score: { $meta: 'textScore' }, publishedAt: -1 } : { publishedAt: -1 };
+    const posts = await Post.find(filter).select('title slug excerpt').sort(sort).skip((page - 1) * size).limit(size + 1).lean();
+    return { posts: posts.slice(0, size), hasMore: posts.length > size };
+  },
+  async sitemapPosts() {
+    await initializeApp();
+    return Post.find({ status: 'published' }).select('slug publishedAt updatedAt coverImage').sort({ publishedAt: -1 }).lean();
+  },
+}));
 app.use('/api', (req, _res, next) => next(notFound(`No API route ${req.method} ${req.originalUrl}`)));
 app.use(errorHandler);
 

@@ -10,6 +10,8 @@ import { Reveal } from '../components/motion/Reveal.jsx';
 import { useSmoothScroll } from '../components/motion/SmoothScroll.jsx';
 import { useApi } from '../hooks/useApi.js';
 import { site } from '../site.config.js';
+import { mediaUrl } from '../lib/api.js';
+import { articleSchema } from '../../../shared/seo.js';
 import NotFound from './NotFound.jsx';
 
 function ReadingProgress() {
@@ -62,34 +64,19 @@ export default function Post() {
   return (
     <div className="pb-[clamp(4rem,8vw,8rem)] pt-36 md:pt-44">
       <Seo
+        pending={loading}
         title={post?.title ?? 'Research note'}
         description={post?.excerpt || site.description}
         path={`/blog/${slug}`}
         image={post?.coverImage?.url ? mediaUrl(post.coverImage.url) : undefined}
+        imageAlt={post?.coverImage?.alt}
         type={post ? 'article' : 'website'}
-        noIndex={!post}
+        noIndex={Boolean(error)}
         publishedTime={post?.publishedAt}
         modifiedTime={post?.updatedAt}
         author={post?.author || 'VoiceLK Research Team'}
         tags={post?.tags ?? []}
-        jsonLd={
-          post
-            ? {
-                '@context': 'https://schema.org',
-                '@type': 'BlogPosting',
-                headline: post.title,
-                description: post.excerpt || site.description,
-                url: `${site.url}/blog/${post.slug}`,
-                mainEntityOfPage: `${site.url}/blog/${post.slug}`,
-                datePublished: post.publishedAt,
-                dateModified: post.updatedAt || post.publishedAt,
-                author: { '@type': 'Person', name: post.author || 'VoiceLK Research Team' },
-                publisher: { '@type': 'Organization', name: 'VoiceLK Research Team', url: site.url },
-                keywords: post.tags?.join(', '),
-                ...(post.coverImage?.url && { image: new URL(mediaUrl(post.coverImage.url), site.url).href }),
-              }
-            : undefined
-        }
+        jsonLd={post ? articleSchema({ ...post, coverImage: { ...post.coverImage, url: post.coverImage?.url ? mediaUrl(post.coverImage.url) : '' } }, site.url) : undefined}
       />
       <ReadingProgress />
       {loading && (

@@ -4,8 +4,9 @@ import { X } from 'lucide-react';
 import Portal from '../../components/Portal.jsx';
 import { mediaUrl } from '../../lib/api.js';
 import { videoEmbed } from '../../lib/embed.js';
+import { imageAlt } from '../../../../shared/images.js';
 
-export function ImageView({ url, alt, caption, width }) {
+export function ImageView({ url, alt, caption, width, decorative = false }) {
   const [zoomed, setZoomed] = useState(false);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export function ImageView({ url, alt, caption, width }) {
         className={`block w-full cursor-zoom-in overflow-hidden bg-wash ${width === 'full' ? '' : 'rounded-xl border border-line shadow-card'}`}
         aria-label={`Enlarge image${alt ? `: ${alt}` : ''}`}
       >
-        <img src={src} alt={alt ?? ''} loading="lazy" className="h-auto w-full" />
+        <img src={src} alt={imageAlt(alt, caption, decorative)} loading="lazy" className="h-auto w-full" />
       </button>
       {caption && (
         <figcaption className={`mt-3 text-sm text-muted ${width === 'full' ? 'mx-auto max-w-[44rem] px-4' : ''}`}>
@@ -49,7 +50,7 @@ export function ImageView({ url, alt, caption, width }) {
             >
               <motion.img
                 src={src}
-                alt={alt ?? ''}
+                alt={imageAlt(alt, caption, decorative)}
                 className="max-h-full max-w-full rounded-lg shadow-soft"
                 initial={{ scale: 0.96 }}
                 animate={{ scale: 1 }}

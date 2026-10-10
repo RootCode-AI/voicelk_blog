@@ -346,7 +346,8 @@ export default function PostEditor() {
               {form.coverImage.url && (
                 <input
                   className="field"
-                  placeholder="Alt text"
+                  placeholder="Describe the cover image (required to publish)"
+                  aria-label="Cover image alt text"
                   value={form.coverImage.alt}
                   onChange={(e) => update({ coverImage: { ...form.coverImage, alt: e.target.value } })}
                 />

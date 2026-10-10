@@ -380,3 +380,14 @@
     transition-duration: 0.01ms !important;
   }
 }
+/* Readable server-rendered content remains available before JavaScript loads. */
+.seo-document { max-width: 52rem; margin: 3rem auto; padding: 0 1.5rem; line-height: 1.7; }
+.seo-document nav { margin-bottom: 2rem; }
+.seo-document h1 { font-size: 2.5rem; line-height: 1.2; margin: 1.5rem 0; }
+.seo-document h2 { font-size: 1.6rem; margin: 1.5rem 0 0.75rem; }
+.seo-document h3 { font-size: 1.25rem; margin-top: 1rem; }
+.seo-document p, .seo-document figure, .seo-document pre { margin: 1rem 0; }
+.seo-document a { text-decoration: underline; }
+.seo-document img { max-width: 100%; height: auto; }
+.seo-document pre { overflow-x: auto; }
+.seo-document td, .seo-document th { padding: 0.5rem; border: 1px solid #ddd; }

@@ -4,6 +4,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import CodeView from './CodeView.jsx';
+import { imageAlt } from '../../../../shared/images.js';
 
 // Markdown in text and callout blocks: GFM (tables, task lists, strikethrough),
 // $inline$ and $$display$$ maths, and fenced code rendered like a code block.
@@ -28,7 +29,7 @@ const components = {
       </div>
     );
   },
-  img: ({ src, alt }) => <img src={src} alt={alt ?? ''} loading="lazy" />,
+  img: ({ src, alt }) => <img src={src} alt={imageAlt(alt)} loading="lazy" />,
 };
 
 export default function Markdown({ children, className = '' }) {

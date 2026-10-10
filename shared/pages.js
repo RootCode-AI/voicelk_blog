@@ -1,0 +1,52 @@
+// Review legal copy with the site operator before deployment; not a compliance certification.
+export const publicPages = {
+  '/privacy': {
+    title: 'Privacy Policy',
+    description: 'How VoiceLK Journal handles newsletter subscriptions, contact messages, optional analytics and your privacy choices.',
+    intro: 'This notice describes the data handled by VoiceLK Journal at voicelk.dev, operated by the VoiceLK Research Team.',
+    updated: '10 October 2026',
+    sections: [
+      { title: 'Information you provide', body: 'When you subscribe, we store your email address, subscription status, subscription timestamps and unsubscribe token. When you contact us, we store your name, email address, message and timestamps so the team can respond. Do not send passwords, payment details or sensitive personal information through these forms.' },
+      { title: 'How information is used', body: 'Subscription details are used to send research updates you requested and to manage unsubscribe requests. Contact details are used to respond to your enquiry. Access is limited to administrators and the service providers needed to operate the journal.' },
+      { title: 'Optional analytics and local storage', body: 'Analytics is off until you choose Allow analytics. If enabled, Vercel Web Analytics measures public page views and aggregated browser, device, referrer and approximate location information. We remove query strings and fragments from page-view URLs and exclude admin and newsletter-action pages. We do not send form contents as analytics events. Your choice is stored in this browser using local storage; use Analytics preferences in the footer to change it. Do Not Track or Global Privacy Control disables this integration.' },
+      { title: 'Cookies and operational data', body: 'Administrator sign-in uses a necessary session cookie; reading public articles does not require an account. Hosting providers receive technical request information, such as IP addresses and browser details, to deliver and secure the site. Rate limiting also processes request information to reduce abuse. Optional Vercel Web Analytics does not use third-party tracking cookies.' },
+      { title: 'Service providers and external content', body: 'The configured stack uses Vercel for hosting and optional analytics, MongoDB Atlas for stored records, and Resend for email when enabled. Google Fonts and externally hosted article images or embedded videos may receive request information when loaded. These providers may process data outside your country under their own terms and safeguards. Provider configuration and regions must be confirmed by the operator before launch.' },
+      { title: 'Retention and unsubscribe', body: 'Unsubscribing stops future newsletter updates but does not automatically delete the subscriber record. Contact messages and subscription records remain until the team deletes them; this application currently has no automatic deletion schedule. Request deletion through the contact form. Provider logs and backups may have separate retention periods.' },
+      { title: 'Your choices and requests', body: 'Use the unsubscribe link in a newsletter to stop updates. You can ask the team to access, correct or delete information you supplied using the contact form linked below. We may need to verify that the request concerns your information. The rights and exceptions that apply depend on the relevant law.' },
+      { title: 'Security and changes', body: 'We use access controls and protected administrator sessions, but no online service can guarantee absolute security. If this notice changes, we will update the date shown here. Contact the VoiceLK Research Team at rootcode.projects@gmail.com or through About & contact with privacy questions.' },
+    ],
+    links: [{ label: 'Email the privacy contact', href: 'mailto:rootcode.projects@gmail.com' }, { label: 'Contact form', href: '/about#contact' }, { label: 'Vercel analytics privacy information', href: 'https://vercel.com/docs/analytics/privacy-policy' }],
+  },
+  '/terms': {
+    title: 'Terms of Use',
+    description: 'Terms for reading VoiceLK research, using newsletter and contact services, and reusing articles, code and speech samples.',
+    intro: 'These terms explain the intended use of VoiceLK Journal, a research journal operated by the VoiceLK Research Team.',
+    updated: '10 October 2026',
+    sections: [
+      { title: 'Research, not a production guarantee', body: 'Articles, demonstrations and speech samples document work in progress. Results depend on the datasets, checkpoints and conditions described in each article. Verify findings before relying on them. The journal does not promise a continuously available production text-to-speech service.' },
+      { title: 'Responsible use', body: 'Use the site lawfully. Do not attempt unauthorised access, interfere with its operation, evade access controls, send spam or submit content you have no right to share. Do not use speech samples to impersonate people or misrepresent what they said.' },
+      { title: 'Articles, code and media', body: 'Rights remain with the relevant authors and rights holders. Linking to an article does not transfer ownership. Where a repository or asset includes an explicit licence, follow that licence; otherwise ask the team before redistribution or reuse beyond what applicable law allows. Public access and llms.txt do not grant a separate training or reuse licence.' },
+      { title: 'Newsletter and contact forms', body: 'Provide an email address you are entitled to use. Subscribing requests research updates, and you can unsubscribe using the link in those emails. Contact messages are used to respond to enquiries; a message does not create a research collaboration or other service commitment.' },
+      { title: 'Third-party links', body: 'External websites, repositories, fonts, images and video providers are operated separately and have their own terms and privacy practices. A link is provided for context, not a guarantee of the external content.' },
+      { title: 'Availability and responsibility', body: 'Content may be corrected, updated or removed, and the website may be unavailable at times. Material is provided as research information without a guarantee of accuracy or suitability for a particular purpose. Nothing in these terms excludes rights or responsibilities that cannot lawfully be excluded.' },
+      { title: 'Changes and questions', body: 'We may update these terms as the project evolves and will revise the date above. Contact the VoiceLK Research Team at rootcode.projects@gmail.com or through the contact form if you have questions about use or permissions.' },
+    ],
+    links: [{ label: 'Ask about permissions', href: '/about#contact' }, { label: 'Read the Privacy Policy', href: '/privacy' }],
+  },
+  '/faq': {
+    title: 'Frequently Asked Questions',
+    description: 'Answers about VoiceLK, Sinhala-English code-switched speech, research notes, audio samples, subscriptions and contact options.',
+    intro: 'New to the project? Start here, then explore the experiments and results in the journal.',
+    sections: [
+      { title: 'What is VoiceLK?', body: 'VoiceLK is a final-year research project at Rajarata University of Sri Lanka exploring Sinhala-English code-switched text-to-speech. This journal documents the work as it develops.' },
+      { title: 'What does code-switched text-to-speech mean?', body: 'Code-switching means moving between languages within a conversation or sentence. Our research explores how a speech synthesiser can read mixed Sinhala and English naturally.' },
+      { title: 'Where can I find experiments and audio samples?', body: 'Open the Research Journal and choose a published note. Authors can include audio samples, transcripts, charts, code and evaluation results within each article. Not every article includes audio.' },
+      { title: 'Is there a public speech-generation service?', body: 'This website is a research journal, not a public production speech-generation service. Follow published notes for progress and any future demonstration announcements.' },
+      { title: 'Do I need an account to read the journal?', body: 'No. Published notes are public. Administrator accounts are only for the team managing the journal.' },
+      { title: 'How do I receive updates or unsubscribe?', body: 'Enter your email in a Subscribe form to request research updates. Use the unsubscribe link in an email to stop future updates, or contact the team if you need help.' },
+      { title: 'Can I reuse the code, figures or audio?', body: 'Check the licence attached to the specific repository or asset. If no licence is provided, contact the team about permission. Please cite the original article when discussing its findings.' },
+      { title: 'How can I ask a question or suggest a correction?', body: 'Use the form on About & contact. Include the article URL and relevant details so the team can investigate. Please do not include passwords or sensitive personal information.' },
+    ],
+    links: [{ label: 'Read the research', href: '/blog' }, { label: 'Ask the team', href: '/about#contact' }],
+  },
+};
