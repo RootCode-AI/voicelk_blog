@@ -1,6 +1,5 @@
 import { Suspense, lazy } from 'react';
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router';
-import AnalyticsConsent from './components/AnalyticsConsent.jsx';
 import InfoPage from './pages/InfoPage.jsx';
 import { Loader2 } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -37,7 +36,6 @@ function Root() {
       <Suspense fallback={<Loading />}>
         <Outlet />
       </Suspense>
-      <AnalyticsConsent />
     </ToastProvider>
   );
 }

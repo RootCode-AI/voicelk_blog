@@ -49,6 +49,6 @@ history as appropriate. Deleting a file alone does not invalidate a credential.
 
 Use development-only databases and synthetic test records. Keep server secrets
 out of browser bundles and `VITE_*` variables. Review dependencies and preserve
-draft access restrictions, administrative authentication and analytics redaction.
+draft access restrictions, administrative authentication and personal-data protection.
 Use [ACCESSIBILITY.md](ACCESSIBILITY.md) for non-security access barriers and
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community safety concerns.

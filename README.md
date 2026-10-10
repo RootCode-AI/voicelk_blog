@@ -121,7 +121,7 @@ public address so email links point to the right place.
 - `/faq`: Accessible expandable answers about the project, research, samples and updates.
 - The homepage has a prominent **Read the research** CTA and newsletter subscription
   form. Contact and subscribe forms link to the Privacy Policy. The footer links to
-  all new pages and analytics preferences. Missing pages have a custom 404 with
+  all new pages. Missing pages have a custom 404 with
   recovery links, HTTP 404 status, and `noindex`.
 - Every public page has its own title, description, canonical URL and OG/Twitter
   tags. `robots.txt` (the correct spelling), the dynamic image sitemap, `llms.txt`
@@ -137,25 +137,14 @@ The site currently has no automatic contact/subscriber deletion schedule, and th
 policy explicitly states this. The public contact address does not change SMTP,
 Resend or `CONTACT_TO` credentials.
 
-### Analytics and privacy choices
+### Analytics
 
-Vercel Web Analytics is integrated but **off until the visitor opts in**. A small
-preferences panel offers Allow analytics and No thanks; the footer reopens it.
-The decision is stored locally under `voicelk-analytics-consent`. Do Not Track and
-Global Privacy Control override opt-in. Revoking consent prevents subsequent events;
-it does not delete events already sent. Storage failures leave tracking disabled.
-
-The integration only sends public page views on production `https://voicelk.dev`.
-Query strings and fragments are stripped, admin/newsletter-action/API/unknown paths
-are excluded, and no form or custom events are sent. The analytics SDK is not mounted
-before permission is given. Other site resources (fonts, media and operational
-hosting requests) are separate from this optional analytics choice.
-
-In the Vercel project dashboard, enable **Web Analytics**, redeploy, allow analytics
-on the production site and verify visits appear. Dashboard activation and live data
-collection have not been performed by the local code changes. See
-[Vercel setup](https://vercel.com/docs/analytics/quickstart) and
-[privacy documentation](https://vercel.com/docs/analytics/privacy-policy).
+Visitor analytics and its preference controls have been removed. The application
+does not load the Vercel Analytics SDK or send visitor analytics events. Hosting
+logs, external fonts/media and necessary administrator cookies are separate and
+are described in the Privacy Policy. Previously stored browser preferences are
+no longer read. This removal does not delete historical provider data or change
+Vercel dashboard settings; redeploy for the removal to reach visitors.
 
 ### Image accessibility
 
@@ -173,8 +162,8 @@ descriptions. Review older published images in the editor before relaunching.
 See [W3C alt-text guidance](https://www.w3.org/WAI/tutorials/images/decision-tree/).
 
 Run `npm run build` then `npm run test:seo` before release. Tests cover new public
-pages, metadata, sitemap/Markdown discovery, alt validation, analytics URL filtering,
-404s and production server routing. Also manually check consent choices, links,
+pages, metadata, sitemap/Markdown discovery, alt validation, analytics removal,
+404s and production server routing. Also manually check links,
 FAQ keyboard controls and forms on desktop and mobile before public deployment.
 
 The canonical site is `https://voicelk.dev`, configured in `shared/seo.js`.

@@ -15,7 +15,6 @@ import { publicPages } from '../../shared/pages.js';
 import { assertPublishedImageAlt } from '../src/lib/imageAlt.js';
 import { imageAlt } from '../../shared/images.js';
 import { sanitizeBlocks } from '../src/lib/blocks.js';
-import { sanitizeAnalyticsEvent } from '../../client/src/lib/analytics.js';
 
 const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
 test('Vercel installs the build-only image dependency and its optional platform packages', async () => {
@@ -336,13 +335,13 @@ test('published image checks cover covers, image blocks, Markdown and explicit d
   assert.match(html, /alt=""/);
 });
 
-test('analytics excludes sensitive and unknown routes, strips search and hash, and never sends form events', () => {
-  for (const path of ['/admin', '/admin/posts/new', '/newsletter/unsubscribe?token=secret', '/api/contact', '/missing']) {
-    assert.equal(sanitizeAnalyticsEvent({ type: 'pageview', url: `https://voicelk.dev${path}` }), null);
-  }
-  assert.equal(sanitizeAnalyticsEvent({ type: 'pageview', url: 'https://preview.vercel.app/blog' }), null);
-  assert.equal(sanitizeAnalyticsEvent({ type: 'event', url: 'https://voicelk.dev/about' }), null);
-  assert.equal(sanitizeAnalyticsEvent({ type: 'pageview', url: 'invalid' }), null);
-  assert.deepEqual(sanitizeAnalyticsEvent({ type: 'pageview', url: 'https://voicelk.dev/blog?q=private-email#section' }), { type: 'pageview', url: 'https://voicelk.dev/blog' });
-  assert.ok(sanitizeAnalyticsEvent({ type: 'pageview', url: 'https://voicelk.dev/privacy' }));
+test('analytics integration and preference controls are removed', async () => {
+  const app = await readFile(new URL('../../client/src/App.jsx', import.meta.url), 'utf8');
+  const manifest = JSON.parse(await readFile(new URL('../../client/package.json', import.meta.url), 'utf8'));
+  assert.doesNotMatch(app, /AnalyticsConsent|@vercel\/analytics/);
+  assert.equal(manifest.dependencies['@vercel/analytics'], undefined);
+  assert.equal(existsSync(new URL('../../client/src/components/AnalyticsConsent.jsx', import.meta.url)), false);
+  const privacy = renderPublicContent({ path: '/privacy' });
+  assert.doesNotMatch(privacy, /Change analytics choice|Analytics preferences|Allow analytics/);
+  assert.match(privacy, /does not include visitor analytics tracking/);
 });

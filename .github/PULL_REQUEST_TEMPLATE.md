@@ -17,7 +17,7 @@
 - [ ] Informative images have descriptive alt text; decorations are explicitly marked
 - [ ] Audio/video changes include appropriate text alternatives
 - [ ] No secrets, personal records, private tokens or unlicensed assets included
-- [ ] Draft visibility, admin access and analytics consent/redaction remain intact
+- [ ] Draft visibility, admin access and visitor privacy remain intact
 
 <!-- Mark items not relevant to this PR as N/A with a brief explanation. -->
 

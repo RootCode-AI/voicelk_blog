@@ -62,7 +62,7 @@ Build first so the production-template smoke test is exercised. The SEO tests
 use test fixtures and do not need a live production database. Add regression
 coverage when changing behaviour. For UI changes, also check desktop/mobile
 layouts, keyboard navigation, reduced motion, and relevant screen-reader output.
-For analytics changes, test allow, decline, revocation and private-route exclusion.
+Do not reintroduce visitor tracking without an explicit privacy and consent review.
 Document anything you could not verify; automated SEO tests are not an accessibility audit.
 
 ## Pull requests
