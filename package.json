@@ -1,6 +1,7 @@
 {
   "name": "voicelk-blog",
   "private": true,
+  "type": "module",
   "description": "VoiceLK research journal: React client and Express/MongoDB API",
   "workspaces": [
     "server",

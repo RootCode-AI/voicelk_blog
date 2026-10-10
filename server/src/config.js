@@ -20,7 +20,7 @@ export const config = {
     from: process.env.MAIL_FROM ?? 'VoiceLK Journal <onboarding@resend.dev>',
     contactTo: process.env.CONTACT_TO ?? '',
   },
-  uploadLimitBytes: Number(process.env.UPLOAD_LIMIT_MB ?? 25) * 1024 * 1024,
+  uploadLimitBytes: Number(process.env.UPLOAD_LIMIT_MB ?? 4) * 1024 * 1024,
 };
 
 export const isProduction = config.env === 'production';
