@@ -1,4 +1,4 @@
-// Everything that describes the project rather than a post lives here.
+// Product information shared across the website.
 // Fill in the repository links and team once they are ready — cards with an
 // empty url render as "link coming soon" instead of a dead link.
 
@@ -6,20 +6,20 @@ import { seoSite } from '../../shared/seo.js';
 
 export const site = {
   name: 'VoiceLK',
-  title: 'VoiceLK Journal',
+  title: 'VoiceLK',
   url: seoSite.url,
   seoTitle: seoSite.title,
   description:
-    'Research on Sinhala-English code-switched text-to-speech, including text normalisation, grapheme-to-phoneme conversion, VITS training and evaluation.',
+    'VoiceLK is a Sinhala-English text-to-speech product built from research, bringing mixed-language text to life as speech.',
   tagline:
-    'Research notes from a final-year project on Sinhala–English code-switched speech synthesis — from text normalisation and G2P to training VITS and serving it.',
+    'VoiceLK turns Sinhala–English text into speech. A product built from research, designed for the way you speak.',
   university: 'Rajarata University of Sri Lanka',
   contactEmail: 'rootcode.projects@gmail.com',
 
   repos: [
     {
       name: 'voicelk_ml',
-      label: 'Research code',
+      label: 'Speech engine',
       description: 'Text normalisation, code-switched G2P, VITS training and evaluation.',
       stack: 'Python · PyTorch',
       url: '',

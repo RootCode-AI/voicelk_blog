@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible problem in VoiceLK Journal
+about: Report a reproducible problem in the VoiceLK website
 title: "[Bug] "
 labels: ""
 assignees: ""

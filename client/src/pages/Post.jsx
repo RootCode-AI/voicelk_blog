@@ -13,6 +13,7 @@ import { site } from '../site.config.js';
 import { mediaUrl } from '../lib/api.js';
 import { articleSchema } from '../../../shared/seo.js';
 import NotFound from './NotFound.jsx';
+import { sectionForPost } from '../../../shared/postSections.js';
 
 function ReadingProgress() {
   const { scrollYProgress } = useScroll();
@@ -65,7 +66,7 @@ export default function Post() {
     <div className="pb-[clamp(4rem,8vw,8rem)] pt-36 md:pt-44">
       <Seo
         pending={loading}
-        title={post?.title ?? 'Research note'}
+        title={post?.title ?? 'VoiceLK update'}
         description={post?.excerpt || site.description}
         path={`/blog/${slug}`}
         image={post?.coverImage?.url ? mediaUrl(post.coverImage.url) : undefined}
@@ -74,7 +75,7 @@ export default function Post() {
         noIndex={Boolean(error)}
         publishedTime={post?.publishedAt}
         modifiedTime={post?.updatedAt}
-        author={post?.author || 'VoiceLK Research Team'}
+        author={post?.author || 'VoiceLK Team'}
         tags={post?.tags ?? []}
         jsonLd={post ? articleSchema({ ...post, coverImage: { ...post.coverImage, url: post.coverImage?.url ? mediaUrl(post.coverImage.url) : '' } }, site.url) : undefined}
       />
@@ -95,8 +96,8 @@ export default function Post() {
 
           <div className="mx-auto mt-20 w-[min(44rem,calc(100%-2rem))]">
             <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-8">
-              <Link to="/blog" className="inline-flex items-center gap-1.5 text-sm text-slate hover:text-ink">
-                <ArrowLeft className="size-4" /> All notes
+              <Link to={sectionForPost(post).path} className="inline-flex items-center gap-1.5 text-sm text-slate hover:text-ink">
+                <ArrowLeft className="size-4" /> Back to {sectionForPost(post).label}
               </Link>
               <CopyLink />
             </div>

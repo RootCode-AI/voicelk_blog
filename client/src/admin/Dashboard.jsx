@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext.jsx';
 import { useApi } from '../hooks/useApi.js';
 import { api } from '../lib/api.js';
 import { formatShortDate, timeAgo } from '../lib/format.js';
+import { postSections, sectionForPost } from '../../../shared/postSections.js';
 
 function Stat({ label, value, hint }) {
   return (
@@ -26,8 +27,9 @@ const FILTERS = [
 export default function Dashboard() {
   const toast = useToast();
   const [filter, setFilter] = useState('');
+  const [section, setSection] = useState('');
   const { data: stats, reload: reloadStats } = useApi('/admin/stats');
-  const { data, loading, error, reload } = useApi(`/admin/posts${filter ? `?status=${filter}` : ''}`);
+  const { data, loading, error, reload } = useApi(`/admin/posts?${new URLSearchParams({ ...(filter && { status: filter }), ...(section && { section }) })}`);
   const [busy, setBusy] = useState(null);
 
   async function remove(post) {
@@ -85,7 +87,14 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="mt-10 flex gap-1" role="tablist">
+      <div className="mt-8 max-w-sm">
+        <label htmlFor="post-section-filter" className="field-label">Filter by section</label>
+        <select id="post-section-filter" className="field" value={section} onChange={(event) => setSection(event.target.value)}>
+          <option value="">All sections</option>
+          {Object.entries(postSections).map(([value, item]) => <option key={value} value={value}>{item.label}</option>)}
+        </select>
+      </div>
+      <div className="mt-6 flex gap-1" role="tablist">
         {FILTERS.map((f) => (
           <button
             key={f.value}
@@ -126,6 +135,7 @@ export default function Dashboard() {
               <li key={post._id} className="flex flex-wrap items-center gap-4 px-5 py-4 transition-colors hover:bg-paper">
                 <Link to={`/admin/posts/${post._id}`} className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-slate">{sectionForPost(post).label}</span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
                         post.status === 'published' ? 'bg-[#0f7b3f]/10 text-success' : 'bg-wash text-muted'

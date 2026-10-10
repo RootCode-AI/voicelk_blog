@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react';
 import { Menu, X } from 'lucide-react';
 import { site } from '../site.config.js';
 
 const links = [
-  { to: '/blog', label: 'Journal' },
-  { to: '/#project', label: 'Project' },
+  { to: '/journey', label: 'Journey' },
+  { to: '/#project', label: 'Product' },
   { to: '/about', label: 'About' },
 ];
 
@@ -22,7 +22,6 @@ export function Logo() {
       </span>
       <span className="text-[15px] font-semibold tracking-tight">
         {site.name}
-        <span className="font-serif text-lg font-normal italic text-muted"> Journal</span>
       </span>
     </Link>
   );
@@ -31,6 +30,7 @@ export function Logo() {
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const menuButton = useRef(null);
   const { pathname } = useLocation();
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, 'change', (v) => setScrolled(v > 24));
@@ -41,13 +41,31 @@ export default function Navbar() {
     setOpen(false);
   }
 
+  useEffect(() => {
+    if (!open) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        menuButton.current?.focus();
+      }
+    };
+    const desktop = window.matchMedia('(min-width: 48rem)');
+    const closeOnDesktop = () => { if (desktop.matches) setOpen(false); };
+    window.addEventListener('keydown', closeOnEscape);
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => {
+      window.removeEventListener('keydown', closeOnEscape);
+      desktop.removeEventListener('change', closeOnDesktop);
+    };
+  }, [open]);
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-[100] transition-[background,box-shadow,backdrop-filter] duration-300 ${
         scrolled || open ? 'bg-paper/80 shadow-[0_1px_0_rgba(0,0,0,0.06)] backdrop-blur-md' : ''
       }`}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <nav aria-label="Main navigation" className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Logo />
         <ul className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
@@ -65,12 +83,12 @@ export default function Navbar() {
             </li>
           ))}
           <li className="ml-2">
-            <Link to="/#subscribe" className="btn-dark px-4! py-2! text-sm">
-              Subscribe
+            <Link to="/research" className="btn-dark px-4! py-2! text-sm">
+              Read the research
             </Link>
           </li>
         </ul>
-        <button className="btn-icon md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Menu" aria-expanded={open}>
+        <button ref={menuButton} type="button" className="btn-icon size-11! md:hidden" onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="mobile-navigation">
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </nav>
@@ -78,15 +96,17 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.ul
+            id="mobile-navigation"
+            aria-label="Mobile navigation"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="border-t border-line px-4 pb-6 pt-2 md:hidden"
+            className="max-h-[calc(100svh-4rem)] overflow-y-auto overscroll-contain border-t border-line bg-paper px-4 pb-6 pt-2 sm:px-6 md:hidden"
           >
-            {[...links, { to: '/#subscribe', label: 'Subscribe' }].map((l) => (
-              <li key={l.to}>
-                <Link to={l.to} className="block py-3 font-serif text-2xl">
+            {[...links, { to: '/research', label: 'Read the research' }].map((l) => (
+              <li key={l.label}>
+                <Link to={l.to} onClick={() => setOpen(false)} className="block py-3 font-serif text-2xl">
                   {l.label}
                 </Link>
               </li>

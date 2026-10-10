@@ -15,6 +15,7 @@ import { publicPages } from '../../shared/pages.js';
 import { assertPublishedImageAlt } from '../src/lib/imageAlt.js';
 import { imageAlt } from '../../shared/images.js';
 import { sanitizeBlocks } from '../src/lib/blocks.js';
+import { postSections } from '../../shared/postSections.js';
 
 const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
 test('Vercel installs the build-only image dependency and its optional platform packages', async () => {
@@ -53,6 +54,53 @@ async function withServer(options, run) {
   finally { server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); }
 }
 
+test('public copy presents VoiceLK as a product with research origins', async () => {
+  await withServer({}, async (base) => {
+    for (const path of ['/', '/about', '/faq', '/privacy', '/terms', '/index.md', '/about.md', '/llms.txt']) {
+      const content = await (await fetch(base + path)).text();
+      assert.doesNotMatch(content, /VoiceLK Journal|VoiceLK Research Team|final-year research project|a research journal/i);
+    }
+    const home = await (await fetch(base + '/')).text();
+    assert.match(home, /text-to-speech product built from research/);
+    assert.match(home, /VoiceLK \| Sinhala-English Text to Speech/);
+    const faq = await (await fetch(base + '/faq')).text();
+    assert.match(faq, /It grew out of research/);
+    assert.match(faq, /does not currently include a public speech-generation interface/);
+  });
+});
+
+test('Journey and Research have separate filtered HTML, Markdown, pagination and sitemap entries', async () => {
+  const calls = [];
+  await withServer({ listPosts: async (query) => {
+    calls.push(query);
+    return { posts: [{ ...post, title: `${query.section} result`, section: query.section }], hasMore: true };
+  } }, async (base) => {
+    for (const [section, item] of Object.entries(postSections)) {
+      const html = await (await fetch(`${base}${item.path}?page=2`)).text();
+      assert.ok(html.includes(`${section} result`));
+      assert.ok(html.includes(`href="https://voicelk.dev${item.path}?page=2"`));
+      assert.ok(html.includes(`href="${item.path}?page=3"`));
+      assert.equal(calls.at(-1).section, section);
+      assert.equal(calls.at(-1).page, 2);
+      const markdown = await (await fetch(`${base}${item.path}.md?page=2`)).text();
+      assert.ok(markdown.includes(`# ${item.title}`));
+      assert.ok(markdown.includes(`${item.path}.md?page=3`));
+      assert.equal(calls.at(-1).section, section);
+      const filtered = await fetch(`${base}${item.path}?q=voice&tag=tts`);
+      assert.equal(filtered.headers.get('x-robots-tag'), 'noindex, follow');
+      assert.equal(calls.at(-1).q, 'voice');
+      assert.equal(calls.at(-1).tag, 'tts');
+    }
+    const sitemap = await (await fetch(`${base}/sitemap.xml`)).text();
+    assert.ok(sitemap.includes('<loc>https://voicelk.dev/journey</loc>'));
+    assert.ok(sitemap.includes('<loc>https://voicelk.dev/research</loc>'));
+    const guide = await (await fetch(`${base}/llms.txt`)).text();
+    assert.ok(guide.includes('/journey.md'));
+    assert.ok(guide.includes('/research.md'));
+    assert.equal((await fetch(`${base}/blog/${post.slug}`)).status, 200);
+  });
+});
+
 test('published post contains crawlable article, one canonical, social tags and matching schema without JavaScript', async () => {
   await withServer({}, async (base) => {
     const response = await fetch(`${base}/blog/${post.slug}`);
@@ -60,7 +108,7 @@ test('published post contains crawlable article, one canonical, social tags and 
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('cache-control'), 'private, no-store');
     assert.equal(response.headers.get('x-robots-tag'), null);
-    assert.match(html, /<title>Sinhala &amp; English speech \| VoiceLK Journal<\/title>/);
+    assert.match(html, /<title>Sinhala &amp; English speech \| VoiceLK<\/title>/);
     assert.equal((html.match(/rel="canonical"/g) || []).length, 1);
     assert.match(html, /rel="canonical" href="https:\/\/voicelk.dev\/blog\/sinhala-english"/);
     assert.match(html, /og:image" content="https:\/\/voicelk.dev\/api\/media\//);
@@ -176,7 +224,7 @@ test('all public pages have a valid social image; only known fallback dimensions
       assert.match(html, /og:image:width" content="1200"/);
       assert.match(html, /og:image:height" content="630"/);
       assert.match(html, /twitter:card" content="summary_large_image"/);
-      assert.match(html, /twitter:image:alt" content="VoiceLK Journal/);
+      assert.match(html, /twitter:image:alt" content="VoiceLK/);
       assert.match(html, /rel="describedby" type="text\/plain" href="https:\/\/voicelk.dev\/llms.txt"/);
       const schema = JSON.parse(html.match(/data-voicelk-seo="true">([\s\S]*?)<\/script>/)[1]);
       assert.ok(schema['@graph'].some((entity) => entity['@type'] === 'WebSite'));
@@ -195,7 +243,7 @@ test('LLM guide and Markdown expose public content, canonical links and crawlabl
     assert.match(guide.headers.get('content-type'), /text\/plain; charset=utf-8/);
     assert.equal(guide.headers.get('cache-control'), 'private, no-store');
     const text = await guide.text();
-    assert.match(text, /^# VoiceLK Journal\n/);
+    assert.match(text, /^# VoiceLK\n/);
     assert.match(text, /https:\/\/voicelk.dev\/blog\/sinhala-english.md/);
     assert.doesNotMatch(text, /\/admin|\/newsletter|draft|MONGODB|JWT/);
     for (const path of ['/index.md', '/about.md', '/blog.md', '/blog/sinhala-english.md']) {
@@ -331,7 +379,7 @@ test('published image checks cover covers, image blocks, Markdown and explicit d
   assert.equal(imageAlt('', 'Experiment results'), 'Experiment results');
   const html = renderPublicContent({ post: { ...post, coverImage: { url: '/cover.png' }, blocks: [image, ...decorated] } });
   assert.match(html, /alt="Cover for Sinhala &amp; English speech"/);
-  assert.match(html, /alt="Research illustration; description not provided"/);
+  assert.match(html, /alt="Article illustration; description not provided"/);
   assert.match(html, /alt=""/);
 });
 

@@ -45,6 +45,75 @@
 }
 
 @layer components {
+  .hero-content {
+    /* Fill the first screen, but allow short screens and enlarged text to scroll. */
+    min-height: 100svh;
+    justify-content: center;
+    padding-top: clamp(6rem, 13svh, 9rem);
+    padding-bottom: clamp(2.5rem, 6svh, 5rem);
+  }
+  .hero-content > * {
+    flex-shrink: 0;
+  }
+  .hero-heading,
+  .hero-description {
+    margin-top: clamp(1.25rem, 3svh, 2rem);
+  }
+  .hero-subscribe {
+    margin-top: clamp(3rem, 7svh, 5rem);
+  }
+  .hero-title {
+    font-size: clamp(2.5rem, 7.25vw, 5rem);
+    text-wrap: balance;
+  }
+  .hero-subtitle {
+    font-size: clamp(3rem, 9vw, 6.25rem);
+    text-wrap: balance;
+  }
+  .newsletter-container {
+    container-type: inline-size;
+    container-name: newsletter;
+  }
+  .newsletter-form {
+    flex-direction: column;
+    border-radius: 1rem;
+    padding: 0.5rem;
+  }
+  .newsletter-form input {
+    width: 100%;
+    padding-inline: 0.75rem;
+  }
+  /* Respond to the form's available space, including the narrow footer card. */
+  @container newsletter (min-width: 24rem) {
+    .newsletter-form {
+      flex-direction: row;
+      align-items: center;
+      border-radius: 40px;
+      padding: 0.375rem 0.375rem 0.375rem 1.25rem;
+    }
+    .newsletter-form input {
+      width: auto;
+      padding-inline: 0;
+    }
+  }
+  @media (min-width: 48rem) {
+    .hero-title {
+      font-size: clamp(2.5rem, min(7.25vw, 10svh), 5rem);
+    }
+    .hero-subtitle {
+      font-size: clamp(3rem, min(9vw, 12.5svh), 6.25rem);
+    }
+  }
+  /* A short landscape viewport should scroll naturally, never clip content. */
+  @media (max-height: 40rem) {
+    .hero-content { padding-top: 5.5rem; padding-bottom: 2rem; }
+    .hero-heading, .hero-description { margin-top: 1rem; }
+    .hero-subscribe { margin-top: 2rem; }
+  }
+  @media (max-width: 47.999rem) {
+    .field, .field-mono { font-size: 1rem; }
+  }
+
   /* The dark CTA: layered inset highlights give it a pressed-metal edge. */
   .btn-dark {
     display: inline-flex;

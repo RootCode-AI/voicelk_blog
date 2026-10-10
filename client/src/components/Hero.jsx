@@ -1,16 +1,12 @@
-import { Link } from 'react-router';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { ArrowUpRight } from 'lucide-react';
 import { fadeUp, stagger } from './motion/Reveal.jsx';
 import NewsletterForm from './NewsletterForm.jsx';
 import WaveBackdrop from './WaveBackdrop.jsx';
-import { useApi } from '../hooks/useApi.js';
 import { site } from '../site.config.js';
 
 const HERO_VIDEO = import.meta.env.VITE_HERO_VIDEO_URL;
 
 export default function Hero() {
-  const { data: stats } = useApi('/stats');
   const { scrollY } = useScroll();
   const backdropY = useTransform(scrollY, [0, 800], [0, 160]);
   const backdropOpacity = useTransform(scrollY, [0, 600], [1, 0.3]);
@@ -35,18 +31,18 @@ export default function Hero() {
         <div className="absolute inset-0 bg-linear-to-b from-transparent from-[26.416%] to-paper to-[66.943%]" />
       </motion.div>
 
-      {/* The design's 290px editorial top padding on tall screens, shrinking with the
-          viewport height so the headline and subscribe field fit the first screen on laptops. */}
+      {/* A viewport-height hero centers the introduction below the fixed navbar.
+          Minimum height (not fixed height) lets short screens scroll naturally. */}
       <motion.div
-        className="mx-auto flex max-w-5xl flex-col items-center px-4 pb-[max(4rem,10dvh)] pt-32 text-center sm:px-6 md:pt-[max(6rem,min(290px,27dvh))]"
+        className="hero-content mx-auto flex max-w-5xl flex-col items-center px-4 text-center sm:px-6"
         initial="hidden"
         animate="show"
         variants={stagger(0.1)}
       >
         <motion.div variants={fadeUp}>
-          <div className="inline-flex items-center gap-3 rounded-full border border-line bg-white/80 py-1.5 pl-1.5 pr-4 text-sm shadow-card backdrop-blur">
-            <span className="flex -space-x-1.5">
-              {['සි', 'En', 'ද'].map((glyph) => (
+          <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-line bg-white/80 py-1.5 pl-1.5 pr-3 text-xs shadow-card backdrop-blur sm:gap-3 sm:pr-4 sm:text-sm">
+            <span className="flex shrink-0 -space-x-1.5" aria-hidden="true">
+              {['සිං', 'EN'].map((glyph) => (
                 <span
                   key={glyph}
                   className="grid size-7 place-items-center rounded-full border-2 border-white bg-ink text-[12px] font-medium text-paper"
@@ -56,47 +52,32 @@ export default function Hero() {
               ))}
             </span>
             <span className="text-slate">
-              {stats?.posts ? (
-                <>
-                  <strong className="font-semibold text-ink">{stats.posts}</strong> research{' '}
-                  {stats.posts === 1 ? 'note' : 'notes'} published
-                </>
-              ) : (
-                'Final-year research journal'
-              )}
+              Sinhala–English text to speech
             </span>
           </div>
         </motion.div>
 
-        <h1 className="mt-[min(2rem,3.5dvh)]">
+        <h1 className="hero-heading w-full">
           <motion.span
             variants={fadeUp}
-            className="block text-[clamp(2.6rem,min(7vw,9dvh),5rem)] font-medium leading-[1.02] tracking-[-0.045em] text-ink"
+            className="hero-title block font-medium leading-[1.05] tracking-[-0.045em] text-ink"
           >
-            Teaching a voice to speak
+            Bring your words to life
           </motion.span>
           <motion.span
             variants={fadeUp}
-            className="mt-1 block font-serif text-[clamp(3rem,min(9vw,11.5dvh),6.25rem)] italic leading-[0.95] tracking-[-0.02em] text-slate"
+            className="hero-subtitle mt-2 block font-serif italic leading-[1.02] tracking-[-0.02em] text-slate"
           >
             Sinhala &amp; English.
           </motion.span>
         </h1>
 
-        <motion.p variants={fadeUp} className="mt-[min(2rem,3.5dvh)] max-w-xl text-[17px] leading-relaxed text-muted">
+        <motion.p variants={fadeUp} className="hero-description max-w-xl text-sm leading-relaxed text-muted sm:text-[15px]">
           {site.tagline}
         </motion.p>
 
-        <motion.div variants={fadeUp} className="mt-[min(2.5rem,4.5dvh)] w-full max-w-md" id="subscribe">
+        <motion.div variants={fadeUp} className="hero-subscribe w-full max-w-md scroll-mt-24" id="subscribe">
           <NewsletterForm />
-        </motion.div>
-
-        <motion.div variants={fadeUp} className="mt-6">
-          <Link to="/blog" className="btn-dark group">
-            Read the research
-            <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </Link>
-          <Link to="/faq" className="btn-ghost ml-3">New here? Start with the FAQ</Link>
         </motion.div>
       </motion.div>
     </section>

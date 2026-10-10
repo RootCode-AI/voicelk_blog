@@ -1,6 +1,6 @@
-# Contributing to VoiceLK Journal
+# Contributing to VoiceLK
 
-This repository is `RootCode-AI/voicelk_blog`: the research journal application.
+This repository is `RootCode-AI/voicelk_blog`: the VoiceLK product website.
 Model training and datasets belong to their respective repositories. Read the
 [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 

@@ -59,6 +59,8 @@ const router = createBrowserRouter([
         children: [
           { path: '/', element: <Home /> },
           { path: '/blog', element: <Blog /> },
+          { path: '/journey', element: <Blog key="journey" section="journey" /> },
+          { path: '/research', element: <Blog key="research" section="research" /> },
           { path: '/blog/:slug', element: <Post /> },
           { path: '/about', element: <About /> },
           ...['/privacy', '/terms', '/faq'].map((path) => ({ path, element: <InfoPage path={path} /> })),

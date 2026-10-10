@@ -12,6 +12,7 @@ import { absoluteUrl } from '../../../shared/seo.js';
 import { publicPages } from '../../../shared/pages.js';
 import InfoContent from '../components/InfoContent.js';
 import { imageAlt } from '../../../shared/images.js';
+import { postSections, isPostListing, sectionFromPath } from '../../../shared/postSections.js';
 
 const markdown = (text) => h(ReactMarkdown, { remarkPlugins: [remarkGfm, remarkMath], rehypePlugins: [rehypeKatex],
   components: { img: ({ src, alt }) => h('img', { src, alt: imageAlt(alt), loading: 'lazy' }) } }, text || '');
@@ -54,7 +55,7 @@ function postLinks(posts) {
 export function renderPublicContent({ path, post, posts = [], page = 1, hasMore = false, status = 200 }) {
   let body;
   if (status === 404) {
-    body = h('section', null, h('h1', null, 'Nothing to hear here.'), h('p', null, 'That page does not exist, or the note has been unpublished.'), h('a', { href: '/blog' }, 'Read the research'), ' · ', h('a', { href: '/' }, 'Go to homepage'));
+    body = h('section', null, h('h1', null, 'Nothing to hear here.'), h('p', null, 'That page does not exist, or the note has been unpublished.'), h('a', { href: '/research' }, 'Read the research'), ' · ', h('a', { href: '/' }, 'Go to homepage'));
   } else if (publicPages[path]) {
     body = h(InfoContent, { path });
   } else if (post) {
@@ -65,22 +66,23 @@ export function renderPublicContent({ path, post, posts = [], page = 1, hasMore 
       safeMedia(post.coverImage?.url) && h('img', { src: post.coverImage.url, alt: imageAlt(post.coverImage.alt, `Cover for ${post.title}`) }),
       ...(post.blocks || []).map((block, index) => h('section', { key: block.id || index }, blockContent(block))));
   } else if (path === '/about') {
-    body = h('section', null, h('h1', null, 'About the VoiceLK Project'),
-      h('p', null, `Everyday Sinhala slips into English and back again mid-sentence. VoiceLK is our final-year project at ${site.university}: a text-to-speech system that reads code-switched text naturally. This journal documents how we build it.`),
+    body = h('section', null, h('h1', null, 'About VoiceLK'),
+      h('p', null, `VoiceLK is a Sinhala-English text-to-speech product built for mixed-language speech. It grew out of research at ${site.university}. Explore the product journey and the research that informs it.`),
       ...site.team.map((member) => h('p', { key: member.name }, `${member.name} — ${member.role}`)));
-  } else if (path === '/' || path === '/blog') {
-    body = h('section', null, h('h1', null, path === '/' ? 'Teaching a voice to speak Sinhala & English' : 'Research Journal'),
-      h('p', null, site.description), path === '/' && h('a', { href: '/blog' }, 'Read the research'), postLinks(posts),
-      page > 1 && h('a', { href: page === 2 ? '/blog' : `/blog?page=${page - 1}` }, 'Previous notes'),
-      hasMore && h('a', { href: `/blog?page=${page + 1}` }, 'More research notes'),
-      path === '/' && h('section', null, h('h2', null, 'The research pipeline'),
+  } else if (path === '/' || isPostListing(path)) {
+    const collection = postSections[sectionFromPath(path)];
+    body = h('section', null, h('h1', null, path === '/' ? 'Bring your words to life in Sinhala & English' : collection?.title || 'Product updates'),
+      h('p', null, collection?.description || site.description), postLinks(posts),
+      page > 1 && h('a', { href: page === 2 ? path : `${path}?page=${page - 1}` }, 'Previous notes'),
+      hasMore && h('a', { href: `${path}?page=${page + 1}` }, 'More updates'),
+      path === '/' && h('section', null, h('h2', null, 'How VoiceLK works'),
         ...site.pipeline.map((step) => h('section', { key: step.step }, h('h3', null, step.title), h('p', null, step.body)))));
   } else {
     body = h('section', null, h('h1', null, path.startsWith('/admin') ? 'Administration' : 'Newsletter preference'),
       h('p', null, 'Enable JavaScript to use this page.'));
   }
   return renderToStaticMarkup(h('main', { className: 'seo-document' },
-    h('nav', { 'aria-label': 'Main navigation' }, h('a', { href: '/' }, 'VoiceLK Journal'), ' · ',
-      h('a', { href: '/blog' }, 'Research'), ' · ', h('a', { href: '/about' }, 'About')),
+    h('nav', { 'aria-label': 'Main navigation' }, h('a', { href: '/' }, 'VoiceLK'), ' · ',
+      h('a', { href: '/journey' }, 'Journey'), ' · ', h('a', { href: '/research' }, 'Read the research'), ' · ', h('a', { href: '/about' }, 'About')),
     body, h('footer', null, h('a', { href: '/faq' }, 'FAQ'), ' · ', h('a', { href: '/privacy' }, 'Privacy Policy'), ' · ', h('a', { href: '/terms' }, 'Terms of Use'))));
 }

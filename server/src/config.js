@@ -17,7 +17,7 @@ export const config = {
   publicUrl: (process.env.PUBLIC_URL ?? clientOrigin).replace(/\/$/, ''),
   mail: {
     resendApiKey: process.env.RESEND_API_KEY ?? '',
-    from: process.env.MAIL_FROM ?? 'VoiceLK Journal <onboarding@resend.dev>',
+    from: process.env.MAIL_FROM ?? 'VoiceLK <onboarding@resend.dev>',
     contactTo: process.env.CONTACT_TO ?? '',
   },
   uploadLimitBytes: Number(process.env.UPLOAD_LIMIT_MB ?? 4) * 1024 * 1024,

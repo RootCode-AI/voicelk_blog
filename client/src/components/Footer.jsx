@@ -9,13 +9,14 @@ export default function Footer() {
         <div className="max-w-sm">
           <Logo />
           <p className="mt-4 text-sm leading-relaxed text-muted">
-            A final-year research project at {site.university}, written up as we go.
+            A Sinhala–English text-to-speech product, built from research at {site.university}.
           </p>
         </div>
         <div>
           <p className="eyebrow mb-3">Read</p>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/blog" className="text-slate hover:text-ink">All notes</Link></li>
+            <li><Link to="/journey" className="text-slate hover:text-ink">Journey</Link></li>
+            <li><Link to="/research" className="text-slate hover:text-ink">Research &amp; results</Link></li>
             <li><Link to="/#project" className="text-slate hover:text-ink">The pipeline</Link></li>
             <li><Link to="/about" className="text-slate hover:text-ink">About &amp; contact</Link></li>
             <li><Link to="/faq" className="text-slate hover:text-ink">Frequently asked questions</Link></li>
@@ -41,7 +42,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-2 px-4 pb-8 text-xs text-muted sm:px-6">
-        <span>© {new Date().getFullYear()} {site.name} research team</span>
+        <span>© {new Date().getFullYear()} {site.name} team</span>
         <span>සිංහල · English</span>
       </div>
     </footer>

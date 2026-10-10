@@ -23,22 +23,23 @@ function SectionHeading({ eyebrow, title, action }) {
   );
 }
 
-function LatestPosts() {
-  const { data, loading, error } = useApi('/posts?limit=3');
+function LatestPosts({ section }) {
+  const research = section === 'research';
+  const { data, loading, error } = useApi(`/posts?limit=3&section=${section}`);
   const posts = data?.posts ?? [];
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-[clamp(4rem,8vw,8rem)] sm:px-6">
       <SectionHeading
-        eyebrow="Latest from the journal"
+        eyebrow={research ? 'Research' : 'Journey'}
         title={
           <>
-            Notes from the <em>lab bench</em>
+            {research ? <>Results &amp; <em>outcomes</em></> : <>Building the <em>product</em></>}
           </>
         }
         action={
-          <Link to="/blog" className="btn-ghost">
-            All notes <ArrowRight className="size-4" />
+          <Link to={`/${section}`} className="btn-ghost">
+            {research ? 'All research' : 'Follow the journey'} <ArrowRight className="size-4" />
           </Link>
         }
       />
@@ -47,7 +48,7 @@ function LatestPosts() {
         {error && <p className="text-muted">Posts could not be loaded: {error.message}</p>}
         {!loading && !error && posts.length === 0 && (
           <div className="rounded-xl border border-dashed border-line-strong p-10 text-center">
-            <p className="font-serif text-2xl italic">The first note is on its way.</p>
+            <p className="font-serif text-2xl italic">{research ? 'Research results are on their way.' : 'The first journey update is on its way.'}</p>
             <p className="mt-2 text-sm text-muted">Subscribe above and it will land in your inbox.</p>
           </div>
         )}
@@ -64,7 +65,7 @@ function Pipeline() {
     <section id="project" className="scroll-mt-20 border-y border-line bg-white">
       <div className="mx-auto max-w-6xl px-4 py-[clamp(4rem,8vw,8rem)] sm:px-6">
         <SectionHeading
-          eyebrow="The project"
+          eyebrow="The product"
           title={
             <>
               From a line of text to a <em>voice</em>, in four steps
@@ -135,10 +136,10 @@ function SubscribeBand() {
       <Reveal className="grid items-center gap-8 rounded-2xl bg-ink px-6 py-12 text-paper sm:px-12 md:grid-cols-[1.2fr_1fr]">
         <div>
           <h2 className="font-serif text-[clamp(2rem,4vw,3rem)] leading-[1.05]">
-            Hear it as it <em>learns</em>.
+            Follow the <em>journey</em>.
           </h2>
           <p className="mt-3 max-w-md text-[15px] leading-relaxed text-[#b9bbc3]">
-            One email when a new note goes up — training runs, listening tests, and what went wrong. No spam, one-click unsubscribe.
+            Get VoiceLK updates, product progress, and the stories behind each improvement.
           </p>
         </div>
         <NewsletterForm onDark />
@@ -165,7 +166,8 @@ export default function Home() {
         path="/"
       />
       <Hero />
-      <LatestPosts />
+      <LatestPosts section="research" />
+      <LatestPosts section="journey" />
       <Pipeline />
       <Repositories />
       <SubscribeBand />

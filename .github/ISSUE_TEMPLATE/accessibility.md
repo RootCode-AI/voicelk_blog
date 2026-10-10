@@ -1,6 +1,6 @@
 ---
 name: Accessibility barrier
-about: Tell us what prevents you from using the journal
+about: Tell us what prevents you from using the VoiceLK website
 title: "[Accessibility] "
 labels: ""
 assignees: ""

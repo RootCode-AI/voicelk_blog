@@ -14,7 +14,7 @@ export function AddBlogButton({ className = '' }) {
   return (
     <Link to="/admin/posts/new" className={`btn-dark ${className}`}>
       <Plus className="size-4" />
-      Add blog
+      Add post
     </Link>
   );
 }

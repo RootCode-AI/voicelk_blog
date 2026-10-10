@@ -6,7 +6,7 @@ export default function InfoContent({ path }) {
   const page = publicPages[path];
   const faq = path === '/faq';
   return h('article', { className: 'mx-auto max-w-3xl px-4 pb-24 pt-36 sm:px-6 md:pt-44' },
-    h('p', { className: 'eyebrow mb-4' }, faq ? 'A little context' : 'VoiceLK Journal'),
+    h('p', { className: 'eyebrow mb-4' }, faq ? 'A little context' : 'VoiceLK'),
     h('h1', { className: 'font-serif text-5xl leading-tight sm:text-6xl' }, page.title),
     page.updated && h('p', { className: 'mt-4 text-sm text-muted' }, `Last updated: ${page.updated}`),
     h('p', { className: 'mt-6 text-lg leading-relaxed text-slate' }, page.intro),

@@ -29,6 +29,7 @@ const postSchema = new Schema(
       alt: { type: String, default: '' },
     },
     tags: { type: [String], default: [] },
+    section: { type: String, enum: ['journey', 'research'], default: 'journey' },
     author: { type: String, default: '', trim: true, maxlength: 120 },
     status: { type: String, enum: ['draft', 'published'], default: 'draft' },
     featured: { type: Boolean, default: false },

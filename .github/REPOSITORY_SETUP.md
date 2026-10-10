@@ -7,7 +7,7 @@ automatically change any GitHub repository settings.
 
 Copy the single line in [repository-description.txt](repository-description.txt)
 into the repository's About description. The project website is `https://voicelk.dev`.
-The README explains the journal's goals, but editing it does not update GitHub's
+The README explains the product website's goals, but editing it does not update GitHub's
 About field. The saved description has not yet been applied on GitHub.
 
 ## Community files

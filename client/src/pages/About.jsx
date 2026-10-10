@@ -75,8 +75,8 @@ export default function About() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-[clamp(4rem,8vw,8rem)] pt-36 sm:px-6 md:pt-44">
       <Seo
-        title="About the VoiceLK Project"
-        description="Meet VoiceLK, a Rajarata University final-year research project building natural Sinhala-English code-switched text-to-speech."
+        title="About VoiceLK"
+        description="Meet VoiceLK, a Sinhala-English text-to-speech product developed from research at Rajarata University of Sri Lanka."
         path="/about"
       />      <motion.header initial="hidden" animate="show" variants={stagger()} className="max-w-3xl">
         <motion.p variants={fadeUp} className="eyebrow mb-4">About</motion.p>
@@ -85,9 +85,9 @@ export default function About() {
         </motion.h1>
         <motion.p variants={fadeUp} className="mt-8 max-w-2xl text-[17px] leading-relaxed text-slate">
           Everyday Sinhala slips into English and back again mid-sentence. Most speech synthesisers read one language at a
-          time and stumble on the other. VoiceLK is our final-year project at {site.university}: a text-to-speech system
-          that reads code-switched text naturally, and a web application built around it. This journal documents how we
-          build it.
+          time and stumble on the other. VoiceLK is a text-to-speech product built for this mixed-language way of speaking.
+          It grew out of research at {site.university}. Here you can follow the product journey, explore the research
+          behind it, and see how findings shape the product.
         </motion.p>
       </motion.header>
 
@@ -120,7 +120,7 @@ export default function About() {
             Say <em>hello</em>
           </h2>
           <p className="mt-4 max-w-sm leading-relaxed text-slate">
-            Questions about the model, the dataset or the code? Want to lend your voice to a listening test? Write to us.
+            Questions about VoiceLK, feedback on speech output, or ideas for the product? Get in touch.
           </p>
           <a href={`mailto:${site.contactEmail}`} className="mt-4 inline-block text-sm underline">{site.contactEmail}</a>
         </Reveal>

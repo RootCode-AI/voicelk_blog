@@ -1,9 +1,9 @@
-# VoiceLK Journal
+# VoiceLK
 
-VoiceLK's research journal for Sinhala-English code-switched text-to-speech:
-publish experiments, evaluation results and audio samples through a React frontend
-and an Express/MongoDB backend. This repository contains the journal website,
-not the model-training pipeline in `voicelk_ml`.
+VoiceLK is a Sinhala-English text-to-speech product built from research.
+This repository contains its product website, with Journey updates, supporting
+Research results, and an admin editor powered by React and Express/MongoDB.
+The model-training pipeline lives separately in `voicelk_ml`.
 
 ## Community and project information
 
@@ -21,7 +21,7 @@ Security and conduct reports go to `rootcode.projects@gmail.com`.
 does not itself grant an open-source license. Do not assume code, research media,
 datasets or model weights share a license; check each asset's stated terms.
 
-The research blog for VoiceLK, a Sinhala–English code-switched text-to-speech project.
+The product website for VoiceLK, a Sinhala–English text-to-speech product.
 It has two parts: a React + Vite client and an Express API backed by MongoDB, with Resend
 sending the email.
 
@@ -117,10 +117,11 @@ public address so email links point to the right place.
 ### Launch checklist and public pages
 
 - `/privacy`: Privacy Policy, with `rootcode.projects@gmail.com` as the public contact.
-- `/terms`: Terms of Use for the research journal, code/media reuse and subscriptions.
-- `/faq`: Accessible expandable answers about the project, research, samples and updates.
+- `/terms`: Terms of Use for the product website, code/media reuse and subscriptions.
+- `/faq`: Accessible expandable answers about the product, its research origins, samples and updates.
 - The homepage has a prominent **Read the research** CTA and newsletter subscription
-  form. Contact and subscribe forms link to the Privacy Policy. The footer links to
+  form. The homepage subscription helper text and FAQ button are intentionally removed.
+  The contact form and footer retain links to the Privacy Policy. The footer links to
   all new pages. Missing pages have a custom 404 with
   recovery links, HTTP 404 status, and `noindex`.
 - Every public page has its own title, description, canonical URL and OG/Twitter
@@ -241,3 +242,32 @@ Run `npm run test:seo` and `npm run build` before deploying. After deploying:
 
 Technical SEO makes pages discoverable; indexing, rankings and rich results are decided
 by search engines. Search Console verification and deployment are separate account actions.
+
+### Journey and Research publishing
+
+- `/journey` covers problems, experiments, development decisions and lessons learned.
+- `/research` presents findings, evaluation results, speech samples and outcomes.
+- Sign in at `/admin/login`, choose **Add post**, and select **Journey** or
+  **Research** under **Post settings → Section**. Write the content using the
+  existing text, image, chart, table, code and audio blocks, then **Save draft**
+  or **Publish**. Only published posts are public; emailing subscribers is optional.
+- The admin dashboard supports section and publication-status filters. Edit a post
+  and change its section to move it between these pages without changing its URL.
+- Existing posts without a section are treated as Journey. No database migration
+  or automatic rewriting of existing posts is required. Individual `/blog/<slug>`
+  URLs remain stable, and `/blog` remains the combined archive for old links.
+- Both sections have dedicated metadata, sitemap entries and Markdown pages
+  (`/journey.md`, `/research.md`) linked from `/llms.txt`.
+- Run `npm run test:sections` for backend section validation and filtering tests;
+  `npm run test:ui` also checks the editor's save/publish/reclassify workflow using
+  mocked API responses, without writing to MongoDB or sending email.
+
+### Browser layout tests
+
+Run `npm run build`, then `npx playwright install chromium` once and `npm run test:ui`.
+The browser tests use a local preview and mocked API responses, so no MongoDB
+credentials or real subscriptions are needed. They check desktop, tablet, phone
+and landscape layouts, first-screen desktop actions, and mobile navigation.
+Screenshots and failure traces are written to the ignored `test-results/` folder.
+To use an installed Edge or Chrome browser instead, set `UI_BROWSER_CHANNEL` to
+`msedge` or `chrome` before running the tests.

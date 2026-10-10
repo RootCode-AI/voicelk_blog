@@ -5,6 +5,7 @@ import { Reveal } from './motion/Reveal.jsx';
 import { mediaUrl } from '../lib/api.js';
 import { formatDate } from '../lib/format.js';
 import { imageAlt } from '../../../shared/images.js';
+import { sectionForPost } from '../../../shared/postSections.js';
 
 // Posts without a cover image get a typographic one instead of a stock photo.
 export function CoverArt({ post, className = '' }) {
@@ -27,7 +28,7 @@ export function CoverArt({ post, className = '' }) {
           return <rect key={i} x={i * 5 + 1} y={30 - h / 2} width="2.4" height={h} rx="1.2" fill="#373a46" />;
         })}
       </svg>
-      <span className="relative font-serif text-2xl italic text-slate">{post.tags?.[0] ?? 'research note'}</span>
+      <span className="relative font-serif text-2xl italic text-slate">{post.tags?.[0] ?? 'VoiceLK update'}</span>
     </div>
   );
 }
@@ -35,6 +36,7 @@ export function CoverArt({ post, className = '' }) {
 export function PostMeta({ post }) {
   return (
     <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted">
+      <span className="font-medium text-slate">{sectionForPost(post).label}</span>
       <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
       <span aria-hidden="true">·</span>
       <span>{post.readingMinutes} min read</span>

@@ -8,6 +8,7 @@ import { api } from '../../lib/api.js';
 import { newId, slugify, timeAgo } from '../../lib/format.js';
 import BlockList from './BlockList.jsx';
 import { AutoTextarea, Field, MediaInput, Segmented } from './ui.jsx';
+import { postSections } from '../../../../shared/postSections.js';
 
 const emptyPost = () => ({
   title: '',
@@ -18,6 +19,7 @@ const emptyPost = () => ({
   featured: false,
   coverImage: { url: '', alt: '' },
   status: 'draft',
+  section: 'journey',
   blocks: [{ id: newId(), type: 'text', data: { markdown: '' } }],
 });
 
@@ -32,6 +34,7 @@ function toForm(post) {
     featured: Boolean(post.featured),
     coverImage: { url: post.coverImage?.url ?? '', alt: post.coverImage?.alt ?? '' },
     status: post.status ?? 'draft',
+    section: post.section || 'journey',
     blocks: post.blocks ?? [],
   };
 }
@@ -310,6 +313,13 @@ export default function PostEditor() {
           <aside className="space-y-4 xl:sticky xl:top-20 xl:self-start">
             <div className="card space-y-4 p-5">
               <p className="text-sm font-semibold">Post settings</p>
+              <Field label="Section" hint={postSections[form.section].description}>
+                {(fid) => (
+                  <select id={fid} className="field" value={form.section} onChange={(e) => update({ section: e.target.value })}>
+                    {Object.entries(postSections).map(([value, section]) => <option key={value} value={value}>{section.label}</option>)}
+                  </select>
+                )}
+              </Field>
               <Field label="URL slug" hint={form.slug ? `/blog/${form.slug}` : 'Generated from the title'}>
                 {(fid) => (
                   <input

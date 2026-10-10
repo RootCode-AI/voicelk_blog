@@ -53,7 +53,7 @@ export default function NewsletterAction({ action }) {
         </>
       )}
       <Link to="/blog" className="btn-ghost mt-8">
-        Go to the journal
+        Go to VoiceLK
       </Link>
     </div>
   );

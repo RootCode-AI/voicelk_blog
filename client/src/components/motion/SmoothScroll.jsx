@@ -17,7 +17,7 @@ const NAV_OFFSET = 96;
 const ScrollContext = createContext({ scrollToId: () => {} });
 export const useSmoothScroll = () => useContext(ScrollContext);
 
-const query = '(pointer: fine) and (prefers-reduced-motion: no-preference)';
+const query = '(min-width: 64rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)';
 function subscribe(callback) {
   const mql = window.matchMedia(query);
   mql.addEventListener('change', callback);

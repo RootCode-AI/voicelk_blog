@@ -4,6 +4,8 @@ import { blocksToText, readingMinutes, sanitizeBlocks } from '../lib/blocks.js';
 import { HttpError, badRequest, notFound } from '../lib/errors.js';
 import { notifySubscribers } from '../lib/notify.js';
 import { assertPublishedImageAlt } from '../lib/imageAlt.js';
+import { sectionFilter } from '../lib/postSections.js';
+import { postSections } from '../../../shared/postSections.js';
 
 const router = Router();
 
@@ -34,7 +36,11 @@ function cleanTags(tags) {
   return [...new Set(cleaned)].slice(0, 12);
 }
 
-async function applyBody(post, body) {
+export async function applyBody(post, body) {
+  if (body.section !== undefined) {
+    if (typeof body.section !== 'string' || !Object.hasOwn(postSections, body.section)) throw badRequest('Section must be journey or research');
+    post.section = body.section;
+  }
   if (body.title !== undefined) post.title = String(body.title);
   if (body.excerpt !== undefined) post.excerpt = String(body.excerpt);
   if (body.author !== undefined) post.author = String(body.author);
@@ -64,9 +70,9 @@ async function applyBody(post, body) {
 }
 
 router.get('/', async (req, res) => {
-  const filter = ['draft', 'published'].includes(req.query.status) ? { status: req.query.status } : {};
+  const filter = { ...sectionFilter(req.query.section), ...(['draft', 'published'].includes(req.query.status) ? { status: req.query.status } : {}) };
   const posts = await Post.find(filter)
-    .select('title slug status featured tags publishedAt updatedAt notifiedAt readingMinutes coverImage')
+    .select('title slug status section featured tags publishedAt updatedAt notifiedAt readingMinutes coverImage')
     .sort({ updatedAt: -1 })
     .lean();
   res.json({ posts });

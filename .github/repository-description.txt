@@ -1,1 +1,1 @@
-VoiceLK research journal for Sinhala-English code-switched text-to-speech: experiments, evaluation results and audio samples, built with React, Express and MongoDB.
+VoiceLK product website for Sinhala-English text-to-speech, built from research. Product journey, supporting findings and audio samples, powered by React, Express and MongoDB.

@@ -18,6 +18,7 @@ import mediaRoutes from './routes/media.js';
 import subscriberRoutes from './routes/subscribers.js';
 import contactRoutes from './routes/contact.js';
 import { createSeoRouter } from './routes/seo.js';
+import { sectionFilter } from './lib/postSections.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -118,11 +119,11 @@ app.use(createSeoRouter({
     await initializeApp();
     return Post.findOne({ slug, status: 'published' }).lean();
   },
-  async listPosts({ page, size, q, tag }) {
+  async listPosts({ page, size, q, tag, section }) {
     await initializeApp();
-    const filter = { status: 'published', ...(q && { $text: { $search: q } }), ...(tag && { tags: tag }) };
+    const filter = { status: 'published', ...sectionFilter(section), ...(q && { $text: { $search: q } }), ...(tag && { tags: tag }) };
     const sort = q ? { score: { $meta: 'textScore' }, publishedAt: -1 } : { publishedAt: -1 };
-    const posts = await Post.find(filter).select('title slug excerpt').sort(sort).skip((page - 1) * size).limit(size + 1).lean();
+    const posts = await Post.find(filter).select('title slug excerpt section').sort(sort).skip((page - 1) * size).limit(size + 1).lean();
     return { posts: posts.slice(0, size), hasMore: posts.length > size };
   },
   async sitemapPosts() {

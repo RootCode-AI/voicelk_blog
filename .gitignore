@@ -5,3 +5,5 @@ dist/
 *.log
 .DS_Store
 client/public/og-image.png
+test-results/
+playwright-report/

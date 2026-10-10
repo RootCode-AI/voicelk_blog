@@ -2,6 +2,7 @@ import { seoSite, absoluteUrl } from '../../../shared/seo.js';
 import { site } from '../../../client/src/site.config.js';
 import { parseCsv } from '../../../client/src/lib/csv.js';
 import { publicPages } from '../../../shared/pages.js';
+import { postSections, isPostListing, sectionFromPath } from '../../../shared/postSections.js';
 
 const text = (value) => String(value ?? '').replace(/\s+/g, ' ').trim().replace(/[\\`*_{}\[\]<>#|]/g, '\\$&');
 const link = (label, url) => `[${text(label)}](${url})`;
@@ -15,12 +16,13 @@ const fence = (value, language = '') => {
 export function renderLlms(posts, origin = seoSite.url) {
   return [
     `# ${seoSite.name}`, `> ${seoSite.description}`,
-    `VoiceLK is a final-year research project at ${site.university}. This journal documents research in progress; use individual articles for dated findings and cite their canonical HTML URLs.`,
+    `VoiceLK is a Sinhala-English text-to-speech product developed from research at ${site.university}. Journey covers product development; Research documents the findings behind the product. Cite individual articles using their canonical HTML URLs.`,
     'The links below provide Markdown versions of public content. This file is a discovery guide, not a license grant or an access-control policy.',
-    '## Project',
-    `- ${link('Project overview', `${origin}/index.md`)}: Research scope and pipeline.\n- ${link('About VoiceLK', `${origin}/about.md`)}: Project context.\n- ${link('Research journal', `${origin}/blog.md`)}: Published notes and pagination.`,
-    '## Recent research notes',
-    posts.length ? posts.slice(0, 30).map((post) => `- ${link(post.title || post.slug, postUrl(post, origin))}: ${text(post.excerpt || 'Published research note.')}`).join('\n') : 'No research notes have been published yet.',
+    '## Product',
+    ...Object.values(postSections).map((section) => `- ${link(section.label, `${origin}${section.path}.md`)}: ${section.description}`),
+    `- ${link('Product overview', `${origin}/index.md`)}: Product overview and speech pipeline.\n- ${link('About VoiceLK', `${origin}/about.md`)}: Product background.\n- ${link('Product updates', `${origin}/blog.md`)}: Published notes and pagination.`,
+    '## Recent updates',
+    posts.length ? posts.slice(0, 30).map((post) => `- ${link(post.title || post.slug, postUrl(post, origin))}: ${text(post.excerpt || 'Published VoiceLK update.')}`).join('\n') : 'No updates have been published yet.',
     '## Optional',
     ...Object.entries(publicPages).map(([path, page]) => `- ${link(page.title, `${origin}${path}.md`)}: ${page.description}`),
     `- ${link('XML sitemap', `${origin}/sitemap.xml`)}: All canonical public HTML URLs.\n- ${link('Website', `${origin}/`)}: Interactive site for human readers.`,
@@ -58,7 +60,7 @@ function blockMarkdown({ type, data: d = {} }, origin) {
 }
 
 export function renderMarkdown({ path, post, posts = [], page = 1, hasMore = false, origin = seoSite.url }) {
-  const canonical = absoluteUrl(`${path}${path === '/blog' && page > 1 ? `?page=${page}` : ''}`, origin);
+  const canonical = absoluteUrl(`${path}${isPostListing(path) && page > 1 ? `?page=${page}` : ''}`, origin);
   const source = `Canonical HTML: ${canonical}`;
   if (publicPages[path]) {
     const page = publicPages[path];
@@ -73,17 +75,18 @@ export function renderMarkdown({ path, post, posts = [], page = 1, hasMore = fal
     post.updatedAt && `Updated: ${new Date(post.updatedAt).toISOString()}`,
     ...(post.blocks || []).map((block) => blockMarkdown(block, origin)),
   ].filter(Boolean).join('\n\n') + '\n';
-  if (path === '/blog') return [
-    `# Research Journal${page > 1 ? ` — Page ${page}` : ''}`, source,
-    posts.length ? posts.map((post) => `- ${link(post.title, postUrl(post, origin))}: ${text(post.excerpt)}`).join('\n') : 'No research notes have been published yet.',
-    page > 1 && link('Previous notes', `${origin}/blog.md${page > 2 ? `?page=${page - 1}` : ''}`),
-    hasMore && link('More research notes', `${origin}/blog.md?page=${page + 1}`),
+  if (isPostListing(path)) return [
+    `# ${postSections[sectionFromPath(path)]?.title || 'Product updates'}${page > 1 ? ` — Page ${page}` : ''}`, source,
+    postSections[sectionFromPath(path)]?.description,
+    posts.length ? posts.map((post) => `- ${link(post.title, postUrl(post, origin))}: ${text(post.excerpt)}`).join('\n') : 'No updates have been published yet.',
+    page > 1 && link('Previous notes', `${origin}${path}.md${page > 2 ? `?page=${page - 1}` : ''}`),
+    hasMore && link('More updates', `${origin}${path}.md?page=${page + 1}`),
   ].filter(Boolean).join('\n\n') + '\n';
   return [
     `# ${path === '/about' ? 'About VoiceLK' : seoSite.name}`, source, seoSite.description,
-    `A final-year research project at ${site.university}.`,
-    '## Research pipeline', ...site.pipeline.map((step) => `### ${step.title}\n\n${step.body}`),
+    `A text-to-speech product developed from research at ${site.university}.`,
+    '## How VoiceLK works', ...site.pipeline.map((step) => `### ${step.title}\n\n${step.body}`),
     ...(site.team.length ? ['## Team', ...site.team.map((member) => `${text(member.name)} — ${text(member.role)}`)] : []),
-    `## Research journal\n\n${link('Read published notes', `${origin}/blog.md`)}`,
+    `## Product updates\n\n${link('Read published notes', `${origin}/blog.md`)}`,
   ].join('\n\n') + '\n';
 }

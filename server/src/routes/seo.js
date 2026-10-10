@@ -4,6 +4,7 @@ import { renderPublicContent } from '../../../client/src/seo/render.js';
 import { seoSite, seoPages } from '../../../shared/seo.js';
 import { pageMetadata, renderDocument, renderRobots, renderSitemap } from '../lib/seo.js';
 import { renderLlms, renderMarkdown } from '../lib/llms.js';
+import { isPostListing, sectionFromPath } from '../../../shared/postSections.js';
 
 const templateUrl = new URL('../../../client/dist/index.html', import.meta.url);
 let template;
@@ -25,26 +26,26 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
       if (preview) res.set('X-Robots-Tag', 'noindex');
       res.type('text/plain').set('Cache-Control', 'private, no-store').send(renderLlms(posts, origin));
     } catch {
-      res.status(503).set({ 'Cache-Control': 'no-store', 'Retry-After': '60' }).type('text/plain').send('Research guide temporarily unavailable.');
+      res.status(503).set({ 'Cache-Control': 'no-store', 'Retry-After': '60' }).type('text/plain').send('VoiceLK guide temporarily unavailable.');
     }
   });
-  router.get(['/index.md', '/about.md', '/blog.md', '/privacy.md', '/terms.md', '/faq.md', '/blog/:slug.md'], async (req, res) => {
+  router.get(['/index.md', '/about.md', '/blog.md', '/journey.md', '/research.md', '/privacy.md', '/terms.md', '/faq.md', '/blog/:slug.md'], async (req, res) => {
     const path = req.path === '/index.md' ? '/' : req.path.slice(0, -3);
     const page = /^\d+$/.test(String(req.query.page ?? '')) ? Math.min(10000, Math.max(1, Number(req.query.page))) : 1;
     try {
       let post;
       let result = { posts: [], hasMore: false };
       if (req.params.slug && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(req.params.slug)) post = await findPost(req.params.slug);
-      if (path === '/blog') result = await listPosts({ page, size: 8, q: '', tag: '' });
+      if (isPostListing(path)) result = await listPosts({ page, size: 8, q: '', tag: '', section: sectionFromPath(path) });
       res.set({ 'X-Robots-Tag': 'noindex, follow', 'Cache-Control': 'private, no-store' });
-      if ((req.params.slug && !post) || (path === '/blog' && page > 1 && !result.posts.length)) {
+      if ((req.params.slug && !post) || (isPostListing(path) && page > 1 && !result.posts.length)) {
         return res.status(404).type('text/plain').send('Not found');
       }
-      const canonical = `${origin}${path}${path === '/blog' && page > 1 ? `?page=${page}` : ''}`;
+      const canonical = `${origin}${path}${isPostListing(path) && page > 1 ? `?page=${page}` : ''}`;
       res.set('Link', `<${canonical}>; rel="canonical", <${origin}/llms.txt>; rel="describedby"`)
         .type('text/markdown').send(renderMarkdown({ path, post, page, ...result, origin }));
     } catch {
-      res.status(503).set({ 'Cache-Control': 'no-store', 'Retry-After': '60' }).type('text/plain').send('Research content temporarily unavailable.');
+      res.status(503).set({ 'Cache-Control': 'no-store', 'Retry-After': '60' }).type('text/plain').send('VoiceLK content temporarily unavailable.');
     }
   });
   router.get(['/sitemap.xml', '/api/sitemap'], async (_req, res) => {
@@ -69,7 +70,7 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
     }
     const path = req.path;
     const page = /^\d+$/.test(String(req.query.page ?? '')) ? Math.min(10000, Math.max(1, Number(req.query.page))) : 1;
-    const filtered = path === '/blog' && Boolean(req.query.q || req.query.tag);
+    const filtered = isPostListing(path) && Boolean(req.query.q || req.query.tag);
     const privatePage = /^\/admin(?:\/|$)/.test(path) || ['/newsletter/confirm', '/newsletter/unsubscribe'].includes(path);
     let post;
     let posts = [];
@@ -80,18 +81,19 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
       if (match) {
         post = await findPost(match[1]);
         if (!post) status = 404;
-      } else if (path === '/' || path === '/blog') {
+      } else if (path === '/' || isPostListing(path)) {
         const size = path === '/' ? 3 : 8;
         const result = await listPosts({ page: path === '/' ? 1 : page, size,
-          q: path === '/blog' ? String(req.query.q || '').trim().slice(0, 100) : '',
-          tag: path === '/blog' ? String(req.query.tag || '').trim().toLowerCase() : '' });
+          section: sectionFromPath(path),
+          q: isPostListing(path) ? String(req.query.q || '').trim().slice(0, 100) : '',
+          tag: isPostListing(path) ? String(req.query.tag || '').trim().toLowerCase() : '' });
         posts = result.posts;
         hasMore = result.hasMore;
-        if (path === '/blog' && page > 1 && !posts.length) status = 404;
+        if (isPostListing(path) && page > 1 && !posts.length) status = 404;
       } else if (!seoPages[path] && !privatePage) {
         status = 404;
       }
-      const meta = pageMetadata({ path, post, status, page: path === '/blog' ? page : 1, filtered, preview, origin });
+      const meta = pageMetadata({ path, post, status, page: isPostListing(path) ? page : 1, filtered, preview, origin });
       const content = renderPublicContent({ path, post, posts, page: path === '/' ? 1 : page, hasMore: path === '/' ? false : hasMore, status });
       const html = renderDocument(await getTemplate(), meta, content);
       if (meta.noIndex) res.set('X-Robots-Tag', 'noindex, follow');

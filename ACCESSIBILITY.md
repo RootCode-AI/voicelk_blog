@@ -1,6 +1,6 @@
 # Accessibility
 
-VoiceLK Journal should let people read Sinhala-English research, listen to samples
+The VoiceLK website should let people explore the product, read its supporting research, listen to samples
 and contact the team using different devices and assistive technologies. The
 maintainers aim toward WCAG 2.2 Level AA; this is a goal, not a conformance claim.
 A complete independent audit and assistive-technology support matrix have not

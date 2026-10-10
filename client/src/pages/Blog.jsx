@@ -7,10 +7,14 @@ import Seo from '../components/Seo.jsx';
 import { fadeUp, stagger } from '../components/motion/Reveal.jsx';
 import { useApi } from '../hooks/useApi.js';
 import { api } from '../lib/api.js';
+import { postSections } from '../../../shared/postSections.js';
 
 const PAGE_SIZE = 8;
 
-export default function Blog() {
+export default function Blog({ section = '' }) {
+  const collection = postSections[section];
+  const path = collection?.path || '/blog';
+  const title = collection?.title || 'Product updates';
   const [params, setParams] = useSearchParams();
   const tag = params.get('tag') ?? '';
   const q = params.get('q') ?? '';
@@ -19,8 +23,8 @@ export default function Blog() {
   const [pages, setPages] = useState({ key: '', posts: [], page: 0, total: 0, pagesTotal: 1 });
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const { data: tagData } = useApi('/posts/tags');
-  const query = new URLSearchParams({ limit: String(PAGE_SIZE), page: String(requestedPage), ...(tag && { tag }), ...(q && { q }) }).toString();
+  const { data: tagData } = useApi(`/posts/tags${section ? `?section=${section}` : ''}`);
+  const query = new URLSearchParams({ limit: String(PAGE_SIZE), page: String(requestedPage), ...(section && { section }), ...(tag && { tag }), ...(q && { q }) }).toString();
   const { data, loading, error } = useApi(`/posts?${query}`);
 
   // Search as the reader types, a moment after they stop.
@@ -62,19 +66,19 @@ export default function Blog() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-[clamp(4rem,8vw,8rem)] pt-36 sm:px-6 md:pt-44">
       <Seo
-        title={requestedPage > 1 ? `Research Journal — Page ${requestedPage}` : 'Research Journal'}
-        description="Experiments, design decisions and results from building a Sinhala-English code-switched text-to-speech system."
-        path={requestedPage > 1 && !tag && !q ? `/blog?page=${requestedPage}` : '/blog'}
+        title={requestedPage > 1 ? `${title} — Page ${requestedPage}` : title}
+        description={collection?.description || 'Experiments, design decisions and results from building a Sinhala-English code-switched text-to-speech system.'}
+        path={requestedPage > 1 && !tag && !q ? `${path}?page=${requestedPage}` : path}
         noIndex={Boolean(tag || q)}
       />      <motion.header initial="hidden" animate="show" variants={stagger()} className="max-w-3xl">
         <motion.p variants={fadeUp} className="eyebrow mb-4">
-          The journal
+          {collection?.label || 'All notes'}
         </motion.p>
         <motion.h1 variants={fadeUp} className="font-serif text-[clamp(3rem,8vw,5.5rem)] leading-[0.95] tracking-[-0.02em]">
-          Every note, <em className="text-slate">in order.</em>
+          {collection ? title : <>Every note, <em className="text-slate">in order.</em></>}
         </motion.h1>
         <motion.p variants={fadeUp} className="mt-6 max-w-xl text-[17px] leading-relaxed text-muted">
-          Design decisions, experiments and results from building a code-switched Sinhala–English voice.
+          {collection?.description || 'Design decisions, experiments and results from building a code-switched Sinhala–English voice.'}
         </motion.p>
       </motion.header>
 
@@ -87,7 +91,7 @@ export default function Blog() {
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Search notes"
             aria-label="Search notes"
-            className="w-full rounded-[40px] border border-line bg-white py-3 pl-11 pr-4 text-[15px] shadow-soft outline-none focus-visible:outline-2 focus-visible:outline-ink"
+            className="w-full rounded-[40px] border border-line bg-white py-3 pl-11 pr-4 text-base shadow-soft outline-none focus-visible:outline-2 focus-visible:outline-ink"
           />
         </div>
         {tagData?.tags?.length > 0 && (
@@ -132,7 +136,7 @@ export default function Blog() {
         {loading && !posts.length && [0, 1, 2].map((i) => <PostRowSkeleton key={i} />)}
         {error && <p className="text-muted">Posts could not be loaded: {error.message}</p>}
         {!loading && !error && posts.length === 0 && (
-          <p className="py-16 text-center font-serif text-2xl italic text-muted">Nothing matches that yet.</p>
+          <p className="py-16 text-center font-serif text-2xl italic text-muted">{tag || q ? 'Nothing matches that yet.' : collection?.empty || 'No notes published yet.'}</p>
         )}
         {posts.map((post, i) => (
           <PostRow key={post._id} post={post} index={i} />
@@ -141,7 +145,7 @@ export default function Blog() {
 
       {firstPage.page < firstPage.pagesTotal && (
         <div className="mt-20 flex justify-center">
-          <a href={`/blog?${new URLSearchParams({ ...(tag && { tag }), ...(q && { q }), page: String(firstPage.page + 1) })}`}
+          <a href={`${path}?${new URLSearchParams({ ...(tag && { tag }), ...(q && { q }), page: String(firstPage.page + 1) })}`}
             onClick={(event) => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (!loadingMore) loadMore(); }}
             className="btn-ghost" aria-disabled={loadingMore}>
             {loadingMore && <Loader2 className="size-4 animate-spin" />}

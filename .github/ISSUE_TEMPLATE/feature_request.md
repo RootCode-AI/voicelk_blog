@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an improvement to the research journal
+about: Suggest an improvement to the VoiceLK product website
 title: "[Feature] "
 labels: ""
 assignees: ""
@@ -23,5 +23,5 @@ assignees: ""
 ## Checks
 
 - [ ] I searched existing issues
-- [ ] This concerns the journal, not a separate model-training repository
+- [ ] This concerns the product website, not a separate model-training repository
 - [ ] I have read the Code of Conduct
