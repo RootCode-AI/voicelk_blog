@@ -77,8 +77,11 @@ export function renderPublicContent({ path, post, posts = [], page = 1, hasMore 
       hasMore && h('a', { href: `${path}?page=${page + 1}` }, 'More updates'),
       path === '/' && h('section', null, h('h2', null, 'How VoiceLK works'),
         ...site.pipeline.map((step) => h('section', { key: step.step }, h('h3', null, step.title), h('p', null, step.body)))));
+  } else if (path === '/evaluate') {
+    body = h('section', null, h('h1', null, 'Rate VoiceLK speech'),
+      h('p', null, 'Listen to each speech sample, then rate its overall quality, clarity and naturalness. Enable JavaScript to take part.'));
   } else {
-    body = h('section', null, h('h1', null, path.startsWith('/admin') ? 'Administration' : 'Newsletter preference'),
+    body = h('section', null, h('h1', null, path.startsWith('/admin') ? 'Administration' : path.startsWith('/evaluate') ? 'Evaluation console' : 'Newsletter preference'),
       h('p', null, 'Enable JavaScript to use this page.'));
   }
   return renderToStaticMarkup(h('main', { className: 'seo-document' },

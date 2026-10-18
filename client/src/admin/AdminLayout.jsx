@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router';
-import { ExternalLink, FileText, Inbox, LogOut, Plus, Users } from 'lucide-react';
+import { AudioLines, ExternalLink, FileText, Inbox, LogOut, Plus, Users } from 'lucide-react';
 import { Logo } from '../components/Navbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -8,6 +8,7 @@ const nav = [
   { to: '/admin', label: 'Posts', icon: FileText, end: true },
   { to: '/admin/subscribers', label: 'Subscribers', icon: Users },
   { to: '/admin/messages', label: 'Messages', icon: Inbox },
+  { to: '/evaluate/console', label: 'Evaluation', icon: AudioLines },
 ];
 
 export function AddBlogButton({ className = '' }) {

@@ -10,7 +10,7 @@ const clock = (s) => {
 };
 
 // A speech sample player — the one block a TTS journal needs most.
-export default function AudioPlayer({ url, title, caption, transcript }) {
+export default function AudioPlayer({ url, title, caption, transcript, onPlay: onPlayed }) {
   const audio = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -23,7 +23,10 @@ export default function AudioPlayer({ url, title, caption, transcript }) {
     const onMeta = () => setDuration(el.duration);
     const onEnd = () => setPlaying(false);
     const onPause = () => setPlaying(false);
-    const onPlay = () => setPlaying(true);
+    const onPlay = () => {
+      setPlaying(true);
+      onPlayed?.();
+    };
     el.addEventListener('timeupdate', onTime);
     el.addEventListener('loadedmetadata', onMeta);
     el.addEventListener('ended', onEnd);
@@ -36,7 +39,7 @@ export default function AudioPlayer({ url, title, caption, transcript }) {
       el.removeEventListener('pause', onPause);
       el.removeEventListener('play', onPlay);
     };
-  }, [url]);
+  }, [url, onPlayed]);
 
   if (!url) return null;
 

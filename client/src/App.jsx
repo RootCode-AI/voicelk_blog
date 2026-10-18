@@ -21,6 +21,13 @@ const Subscribers = lazy(() => import('./admin/Subscribers.jsx'));
 const Messages = lazy(() => import('./admin/Messages.jsx'));
 const Login = lazy(() => import('./admin/Login.jsx'));
 const RequireAdmin = lazy(() => import('./admin/RequireAdmin.jsx'));
+const Evaluate = lazy(() => import('./pages/Evaluate.jsx'));
+const EvaluateRoot = lazy(() => import('./evaluate/EvaluateRoot.jsx'));
+const EvaluateLogin = lazy(() => import('./evaluate/EvaluateLogin.jsx'));
+const ConsoleLayout = lazy(() => import('./evaluate/ConsoleLayout.jsx'));
+const Clips = lazy(() => import('./evaluate/Clips.jsx'));
+const ClipResults = lazy(() => import('./evaluate/ClipResults.jsx'));
+const Evaluators = lazy(() => import('./evaluate/Evaluators.jsx'));
 
 function Loading() {
   return (
@@ -63,6 +70,7 @@ const router = createBrowserRouter([
           { path: '/research', element: <Blog key="research" section="research" /> },
           { path: '/blog/:slug', element: <Post /> },
           { path: '/about', element: <About /> },
+          { path: '/evaluate', element: <Evaluate /> },
           ...['/privacy', '/terms', '/faq'].map((path) => ({ path, element: <InfoPage path={path} /> })),
           { path: '/newsletter/confirm', element: <NewsletterAction action="confirm" /> },
           { path: '/newsletter/unsubscribe', element: <NewsletterAction action="unsubscribe" /> },
@@ -86,6 +94,21 @@ const router = createBrowserRouter([
               { path: 'posts/:id', element: <PostEditor /> },
               { path: 'subscribers', element: <Subscribers /> },
               { path: 'messages', element: <Messages /> },
+            ],
+          },
+        ],
+      },
+      {
+        element: <EvaluateRoot />,
+        children: [
+          { path: '/evaluate/login', element: <EvaluateLogin /> },
+          {
+            path: '/evaluate/console',
+            element: <ConsoleLayout />,
+            children: [
+              { index: true, element: <Clips /> },
+              { path: 'clips/:id', element: <ClipResults /> },
+              { path: 'evaluators', element: <Evaluators /> },
             ],
           },
         ],

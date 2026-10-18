@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { readFile } from 'node:fs/promises';
 import { renderPublicContent } from '../../../client/src/seo/render.js';
-import { seoSite, seoPages } from '../../../shared/seo.js';
+import { seoSite, seoPages, unlistedPages, isEvaluateConsolePath } from '../../../shared/seo.js';
 import { pageMetadata, renderDocument, renderRobots, renderSitemap } from '../lib/seo.js';
 import { renderLlms, renderMarkdown } from '../lib/llms.js';
 import { isPostListing, sectionFromPath } from '../../../shared/postSections.js';
@@ -71,7 +71,7 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
     const path = req.path;
     const page = /^\d+$/.test(String(req.query.page ?? '')) ? Math.min(10000, Math.max(1, Number(req.query.page))) : 1;
     const filtered = isPostListing(path) && Boolean(req.query.q || req.query.tag);
-    const privatePage = /^\/admin(?:\/|$)/.test(path) || ['/newsletter/confirm', '/newsletter/unsubscribe'].includes(path);
+    const privatePage = /^\/admin(?:\/|$)/.test(path) || isEvaluateConsolePath(path) || ['/newsletter/confirm', '/newsletter/unsubscribe'].includes(path);
     let post;
     let posts = [];
     let hasMore = false;
@@ -90,7 +90,7 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
         posts = result.posts;
         hasMore = result.hasMore;
         if (isPostListing(path) && page > 1 && !posts.length) status = 404;
-      } else if (!seoPages[path] && !privatePage) {
+      } else if (!seoPages[path] && !unlistedPages[path] && !privatePage) {
         status = 404;
       }
       const meta = pageMetadata({ path, post, status, page: isPostListing(path) ? page : 1, filtered, preview, origin });
