@@ -103,21 +103,18 @@ range support so audio can seek. No separate file storage is needed.
 - **Contact form:** messages are saved to the database (Admin → Messages) and forwarded
   to `CONTACT_TO`.
 
-**Sending through Gmail (current setup).** Mail comes from `rootcode.projects@gmail.com`,
-shown as "VoiceLK", and replies go to `CONTACT_TO`. No domain needs verifying.
+**Sending through Resend (current setup).** `voicelk.dev` is verified at
+resend.com/domains (its DKIM and `send` records are in Cloudflare DNS), and mail comes from
+`MAIL_FROM=VoiceLK <hello@voicelk.dev>`; replies go to `CONTACT_TO`. Set `RESEND_API_KEY`
+and `MAIL_FROM` in `server/.env` and in Heroku Config Vars; `/api/health` then reports
+`"mail":"resend"`. The free plan sends 100 emails a day (3,000 a month).
 
-1. Turn on 2-Step Verification for the Google account (myaccount.google.com → Security).
-2. Create an app password: myaccount.google.com/apppasswords → name it "VoiceLK" → copy
-   the 16 characters it shows. Your normal Gmail password will not work.
-3. Set `SMTP_USER=rootcode.projects@gmail.com` and `SMTP_PASS=<app password>` in
-   `server/.env` and in Heroku Config Vars. The server log then says
-   `[mail] sending through smtp.gmail.com …`, and `/api/health` reports `"mail":"smtp"`.
-
-A personal Gmail account sends to about 500 recipients a day. **Resend** is used instead
-when `SMTP_USER`/`SMTP_PASS` are empty: it needs a domain verified at resend.com/domains and
-`MAIL_FROM` on that domain, because `onboarding@resend.dev` only reaches your own Resend
-address (health then reports `"resend-test-sender"`). With neither configured, emails are
-printed to the server console.
+`MAIL_FROM` must be on the verified domain: `onboarding@resend.dev` only reaches your own
+Resend address (health reports `"resend-test-sender"`), and a Gmail address cannot be
+verified with Resend at all. To send through a Gmail account instead, set `SMTP_USER` and
+`SMTP_PASS` (an app password from myaccount.google.com/apppasswords); when both are set
+they take priority over Resend and health reports `"smtp"`. With neither configured,
+emails are printed to the server console.
 
 ## Listening evaluation (`/evaluate`)
 
