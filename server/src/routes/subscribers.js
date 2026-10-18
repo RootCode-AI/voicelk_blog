@@ -38,7 +38,7 @@ router.post('/', subscribeLimiter, async (req, res) => {
   let welcomed = false;
   if (!subscriber.welcomedAt || Date.now() - subscriber.welcomedAt.getTime() > WELCOME_INTERVAL_MS) {
     try {
-      // Awaited: a serverless function may be frozen as soon as it responds.
+      // Awaited, so the response reports whether the email actually went out.
       await sendMail({ to: email, ...welcomeEmail(subscriber.unsubscribeToken) });
       subscriber.welcomedAt = new Date();
       await subscriber.save();

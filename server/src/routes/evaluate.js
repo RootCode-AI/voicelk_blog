@@ -157,8 +157,8 @@ router.get('/auth/me', requireEvaluateAccess, (req, res) => {
 const consoleRouter = Router();
 consoleRouter.use(requireEvaluateAccess);
 
-// Clips can be up to 10 MB, more than a serverless request may carry, so the
-// browser uploads straight to Supabase Storage with a one-off signed URL.
+// Clips can be up to 10 MB, so the browser uploads straight to Supabase Storage
+// with a one-off signed URL; the audio never passes through (or occupies) the dyno.
 consoleRouter.post('/uploads', async (req, res) => {
   const upload = parseUploadRequest(req.body);
   const path = `samples/${crypto.randomUUID()}.${upload.extension}`;

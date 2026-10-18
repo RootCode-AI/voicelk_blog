@@ -25,12 +25,14 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
-    "concurrently": "^10.0.5",
-    "sharp": "^0.35.5"
+    "concurrently": "^10.0.5"
   },
   "version": "1.0.0",
   "main": "server/src/index.js",
   "engines": {
     "node": "22.x"
+  },
+  "dependencies": {
+    "sharp": "^0.35.5"
   }
 }

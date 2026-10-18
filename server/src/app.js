@@ -1,10 +1,11 @@
 import express from 'express';
+import compression from 'compression';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
-import { config } from './config.js';
+import { config, isProduction } from './config.js';
 import { connectDb } from './db.js';
 import { errorHandler, notFound } from './lib/errors.js';
 import { mailEnabled } from './lib/mailer.js';
@@ -28,6 +29,18 @@ app.set('trust proxy', 1);
 // The one inline script in client/index.html, allowed by hash; a test keeps them in step.
 export const BOOT_SCRIPT_HASH = "'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='";
 
+// Heroku's router accepts plain http too and passes the original scheme in
+// X-Forwarded-Proto (trusted above). Send every visitor to https in production;
+// 308 keeps the method, so a form posted over http is not silently turned into a GET.
+if (isProduction) {
+  app.use((req, res, next) => {
+    if (req.secure || ['localhost', '127.0.0.1'].includes(req.hostname)) return next();
+    res.redirect(308, `https://${req.headers.host}${req.originalUrl}`);
+  });
+}
+// The app serves its own pages, scripts and styles, so it compresses them itself.
+app.use(compression());
+
 let initialization;
 export function initializeApp() {
   initialization ??= connectDb(config.mongoUri)
@@ -40,9 +53,7 @@ export function initializeApp() {
 }
 
 const allowedOrigins = new Set(
-  [config.clientOrigin, 'http://localhost:5173', process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]
-    .filter(Boolean)
-    .map((origin) => (origin.startsWith('http') ? origin : `https://${origin}`)),
+  [config.clientOrigin, config.publicUrl, 'http://localhost:5173'].filter(Boolean),
 );
 
 app.use(
@@ -114,9 +125,10 @@ app.use('/api/media', mediaRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/evaluate', evaluateRoutes);
-// Preserve static asset delivery on standalone hosts. Vercel serves these via CDN.
+// The built client: fingerprinted bundles are cached for a year, brand images and
+// icons for a day. Pages themselves go through the SEO router below.
 const clientDist = fileURLToPath(new URL('../../client/dist/', import.meta.url));
-if (!process.env.VERCEL && fs.existsSync(clientDist)) {
+if (fs.existsSync(clientDist)) {
   app.use('/assets', express.static(`${clientDist}/assets`, { immutable: true, maxAge: '1y' }));
   app.use('/brand', express.static(`${clientDist}/brand`, { maxAge: '1d' }));
   for (const file of ['favicon-32.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'site.webmanifest']) {

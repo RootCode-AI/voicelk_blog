@@ -31,3 +31,33 @@ test('a connection string is refused, so its password can never reach a response
     assert.equal(supabaseUrl(bad), '', bad);
   }
 });
+
+test('in production, plain http is redirected to https and https is served', () => {
+  // A separate process, because the redirect is chosen from NODE_ENV when app.js loads.
+  const appUrl = new URL('../src/app.js', import.meta.url).href;
+  const script = `
+    const { default: app } = await import(${JSON.stringify(appUrl)});
+    const server = app.listen(0, '127.0.0.1');
+    await new Promise((r) => server.once('listening', r));
+    const { request } = await import('node:http');
+    // fetch() drops a custom Host header, so ask the way Heroku's router does: raw HTTP.
+    const ask = (proto, path, method = 'GET') => new Promise((resolve, reject) => {
+      const req = request({ host: '127.0.0.1', port: server.address().port, path, method,
+        headers: { 'X-Forwarded-Proto': proto, Host: 'voicelk.dev' } }, (res) => { res.resume(); resolve(res); });
+      req.on('error', reject).end();
+    });
+    const plain = await ask('http', '/about?x=1');
+    const post = await ask('http', '/api/contact', 'POST');
+    const secure = await ask('https', '/robots.txt');
+    console.log(JSON.stringify({ plain: [plain.statusCode, plain.headers.location], post: post.statusCode, secure: secure.statusCode }));
+    server.closeAllConnections(); server.close();`;
+  const out = execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+    env: { ...process.env, NODE_ENV: 'production', MONGODB_URI: 'mongodb://127.0.0.1:1/x', JWT_SECRET: 'config-test', RESEND_API_KEY: '' },
+    cwd: fileURLToPath(new URL('..', import.meta.url)),
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  const result = JSON.parse(out.toString().trim().split('\n').pop());
+  assert.deepEqual(result.plain, [308, 'https://voicelk.dev/about?x=1']);
+  assert.equal(result.post, 308);
+  assert.equal(result.secure, 200);
+});
