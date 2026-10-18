@@ -81,7 +81,7 @@ export function renderPublicContent({ path, post, posts = [], page = 1, hasMore 
     body = h('section', null, h('h1', null, 'Rate VoiceLK speech'),
       h('p', null, 'Listen to each speech sample, then rate its overall quality, clarity and naturalness. Enable JavaScript to take part.'));
   } else {
-    body = h('section', null, h('h1', null, path.startsWith('/admin') ? 'Administration' : path.startsWith('/evaluate') ? 'Evaluation console' : 'Newsletter preference'),
+    body = h('section', null, h('h1', null, path.startsWith('/admin') ? 'Administration' : path.startsWith('/write') ? 'Writing desk' : path.startsWith('/evaluate') ? 'Evaluation console' : 'Newsletter preference'),
       h('p', null, 'Enable JavaScript to use this page.'));
   }
   return renderToStaticMarkup(h('main', { className: 'seo-document' },

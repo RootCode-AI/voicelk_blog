@@ -10,6 +10,7 @@ import { newId, slugify, timeAgo } from '../../lib/format.js';
 import BlockList from './BlockList.jsx';
 import { AutoTextarea, Field, MediaInput, Segmented } from './ui.jsx';
 import { postSections } from '../../../../shared/postSections.js';
+import { usePostScope } from './scope.js';
 
 const emptyPost = () => ({
   title: '',
@@ -45,6 +46,7 @@ export default function PostEditor() {
   const isNew = !id;
   const navigate = useNavigate();
   const toast = useToast();
+  const scope = usePostScope();
 
   const [form, setForm] = useState(isNew ? emptyPost : null);
   const [saved, setSaved] = useState(isNew ? null : undefined);
@@ -61,7 +63,7 @@ export default function PostEditor() {
   useEffect(() => {
     if (isNew) return;
     api
-      .get(`/admin/posts/${id}`)
+      .get(`${scope.api}/${id}`)
       .then(({ post }) => {
         const f = toForm(post);
         setForm(f);
@@ -156,7 +158,7 @@ export default function PostEditor() {
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
       };
       try {
-        const { post } = isNew ? await api.post('/admin/posts', payload) : await api.put(`/admin/posts/${id}`, payload);
+        const { post } = isNew ? await api.post(scope.api, payload) : await api.put(`${scope.api}/${id}`, payload);
         const f = toForm(post);
         setForm(f);
         setSaved(JSON.stringify(f));
@@ -166,9 +168,9 @@ export default function PostEditor() {
         const justPublished = status === 'published' && !wasPublished;
         toast.success(justPublished ? 'Published — the post is live' : status === 'published' ? 'Changes are live' : 'Draft saved');
 
-        if (justPublished && notify && !post.notifiedAt) {
+        if (scope.canNotify && justPublished && notify && !post.notifiedAt) {
           try {
-            const res = await api.post(`/admin/posts/${post._id}/notify`);
+            const res = await api.post(`${scope.api}/${post._id}/notify`);
             setMeta((m) => ({ ...m, notifiedAt: res.notifiedAt }));
             toast.success(`Emailed ${res.sent} ${res.sent === 1 ? 'subscriber' : 'subscribers'}`);
           } catch (err) {
@@ -177,7 +179,7 @@ export default function PostEditor() {
         }
         if (isNew) {
           skipBlock.current = true;
-          navigate(`/admin/posts/${post._id}`, { replace: true });
+          navigate(`${scope.base}/posts/${post._id}`, { replace: true });
           skipBlock.current = false;
         }
       } catch (err) {
@@ -187,7 +189,7 @@ export default function PostEditor() {
         setSaving(false);
       }
     },
-    [form, saving, saved, isNew, id, notify, toast, navigate],
+    [form, saving, saved, isNew, id, notify, toast, navigate, scope],
   );
 
   // Ctrl/Cmd + S saves without changing the status.
@@ -206,7 +208,7 @@ export default function PostEditor() {
     return (
       <div className="p-10">
         <p className="text-danger">{loadError.message}</p>
-        <Link to="/admin" className="btn-ghost mt-4">
+        <Link to={scope.base} className="btn-ghost mt-4">
           Back to posts
         </Link>
       </div>
@@ -229,7 +231,7 @@ export default function PostEditor() {
       {/* Toolbar */}
       <div className="sticky top-0 z-[100] border-b border-line bg-paper/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-8">
-          <Link to="/admin" className="btn-icon" aria-label="Back to posts">
+          <Link to={scope.base} className="btn-icon" aria-label="Back to posts">
             <ArrowLeft className="size-4" />
           </Link>
           <span
@@ -336,10 +338,12 @@ export default function PostEditor() {
               <Field label="Author">
                 {(fid) => <input id={fid} className="field" value={form.author} onChange={(e) => update({ author: e.target.value })} />}
               </Field>
-              <label className="flex items-center gap-2 text-sm text-slate">
-                <input type="checkbox" className="accent-ink" checked={form.featured} onChange={(e) => update({ featured: e.target.checked })} />
-                Featured post
-              </label>
+              {scope.canFeature && (
+                <label className="flex items-center gap-2 text-sm text-slate">
+                  <input type="checkbox" className="accent-ink" checked={form.featured} onChange={(e) => update({ featured: e.target.checked })} />
+                  Featured post
+                </label>
+              )}
             </div>
 
             <div className="card space-y-3 p-5">
@@ -361,7 +365,7 @@ export default function PostEditor() {
               )}
             </div>
 
-            {!published && (
+            {scope.canNotify && !published && (
               <div className="card p-5">
                 <label className="flex items-start gap-2.5 text-sm text-slate">
                   <input type="checkbox" className="mt-0.5 accent-ink" checked={notify} onChange={(e) => setNotify(e.target.checked)} />

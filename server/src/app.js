@@ -8,7 +8,7 @@ import helmet from 'helmet';
 import { config, isProduction } from './config.js';
 import { connectDb } from './db.js';
 import { errorHandler, notFound } from './lib/errors.js';
-import { mailEnabled } from './lib/mailer.js';
+import { mailMode } from './lib/mailer.js';
 import { requireAdmin } from './middleware/auth.js';
 import { Post } from './models/Post.js';
 import { Subscriber } from './models/Subscriber.js';
@@ -19,6 +19,8 @@ import mediaRoutes from './routes/media.js';
 import subscriberRoutes from './routes/subscribers.js';
 import contactRoutes from './routes/contact.js';
 import evaluateRoutes from './routes/evaluate.js';
+import writerRoutes from './routes/writer.js';
+import bloggerRoutes from './routes/bloggers.js';
 import { createSeoRouter } from './routes/seo.js';
 import { sectionFilter } from './lib/postSections.js';
 import { supabaseEnabled } from './supabase.js';
@@ -97,7 +99,7 @@ app.use('/api', async (_req, _res, next) => {
 });
 
 app.get('/api/health', (_req, res) =>
-  res.json({ ok: true, mail: mailEnabled ? 'resend' : 'console', evaluation: supabaseEnabled ? 'supabase' : 'off' }));
+  res.json({ ok: true, mail: mailMode, evaluation: supabaseEnabled ? 'supabase' : 'off' }));
 
 app.get('/api/stats', async (_req, res) => {
   const [posts, subscribers, latest] = await Promise.all([
@@ -115,12 +117,14 @@ app.get('/api/admin/stats', requireAdmin, async (_req, res) => {
     Subscriber.countDocuments({ status: 'active' }),
     Subscriber.countDocuments({ status: 'pending' }),
   ]);
-  res.json({ published, drafts, subscribers, pending, mail: mailEnabled ? 'resend' : 'console' });
+  res.json({ published, drafts, subscribers, pending, mail: mailMode });
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/admin/posts', requireAdmin, adminPostRoutes);
+app.use('/api/admin/bloggers', requireAdmin, bloggerRoutes);
+app.use('/api/write', writerRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/contact', contactRoutes);

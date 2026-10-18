@@ -47,6 +47,25 @@ npm run dev                                 # API on :5000, site on http://local
 
 The admin panel is at <http://localhost:5173/admin>.
 
+## Accounts and roles
+
+| Role | Signs in at | Can |
+| --- | --- | --- |
+| Admin | `/admin/login` | Everything: all posts, subscribers, messages, bloggers, the evaluation console |
+| Blogger | `/write/login` | Write, publish, edit and delete **their own** posts, and upload images and audio for them |
+| Evaluator | `/evaluate/login` | Upload clips to the listening evaluation and read its results |
+
+Bloggers cannot see other people's posts, subscribers or messages, feature posts on the
+home page, email subscribers, or open `/admin`; each role has its own session cookie, so
+signing in as one never opens another's pages. Admins see every post (a blogger's is
+marked "by Name (blogger)") and can edit any of them. Removing a blogger signs them out at
+once and leaves their posts on the site.
+
+```powershell
+npm run create-admin -- you@example.com "a long password" "Your Name"
+npm run create-blogger -- writer@example.com "a long password" "Their Name"   # or Admin > Bloggers
+```
+
 ## Writing a post
 
 Click **Add blog**. A post is a list of **blocks**, and readers see them in exactly the
@@ -73,8 +92,10 @@ will see it, and **Ctrl + S** saves.
 Uploaded files are stored in MongoDB (GridFS) and served from `/api/media/<id>`, with
 range support so audio can seek. No separate file storage is needed.
 
-## Email (Resend)
+## Email
 
+- **Welcome:** everyone who subscribes is sent a welcome email straight away. If it
+  could not be sent at the time, entering the same address again sends it.
 - **Newsletter:** subscriptions are active immediately; confirmation links remain
   supported for older pending subscriptions. When you
   publish, tick *Email subscribers when I publish*, or press the mail icon on the
@@ -82,10 +103,21 @@ range support so audio can seek. No separate file storage is needed.
 - **Contact form:** messages are saved to the database (Admin → Messages) and forwarded
   to `CONTACT_TO`.
 
-When `RESEND_API_KEY` is empty, emails are printed to the API console instead of sent, so
-development needs no account. To send real email, verify a domain in Resend and set
-`MAIL_FROM` to an address on it. `onboarding@resend.dev` only delivers to your own Resend
-login address.
+**Sending through Gmail (current setup).** Mail comes from `rootcode.projects@gmail.com`,
+shown as "VoiceLK", and replies go to `CONTACT_TO`. No domain needs verifying.
+
+1. Turn on 2-Step Verification for the Google account (myaccount.google.com → Security).
+2. Create an app password: myaccount.google.com/apppasswords → name it "VoiceLK" → copy
+   the 16 characters it shows. Your normal Gmail password will not work.
+3. Set `SMTP_USER=rootcode.projects@gmail.com` and `SMTP_PASS=<app password>` in
+   `server/.env` and in Heroku Config Vars. The server log then says
+   `[mail] sending through smtp.gmail.com …`, and `/api/health` reports `"mail":"smtp"`.
+
+A personal Gmail account sends to about 500 recipients a day. **Resend** is used instead
+when `SMTP_USER`/`SMTP_PASS` are empty: it needs a domain verified at resend.com/domains and
+`MAIL_FROM` on that domain, because `onboarding@resend.dev` only reaches your own Resend
+address (health then reports `"resend-test-sender"`). With neither configured, emails are
+printed to the server console.
 
 ## Listening evaluation (`/evaluate`)
 

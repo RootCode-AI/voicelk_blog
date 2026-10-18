@@ -43,6 +43,15 @@ export const config = {
     resendApiKey: process.env.RESEND_API_KEY ?? '',
     from: process.env.MAIL_FROM ?? 'VoiceLK <onboarding@resend.dev>',
     contactTo: process.env.CONTACT_TO ?? '',
+    // Sending through a mailbox (Gmail by default) instead of Resend. Gmail needs an
+    // app password: Google Account > Security > 2-Step Verification > App passwords.
+    smtp: {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: Number(process.env.SMTP_PORT || 465),
+      user: optional('SMTP_USER'),
+      // Google shows app passwords in groups of four; the spaces are not part of it.
+      pass: optional('SMTP_PASS').replace(/\s+/g, ''),
+    },
   },
   uploadLimitBytes: Number(process.env.UPLOAD_LIMIT_MB ?? 4) * 1024 * 1024,
   // The listening evaluation lives in Supabase; the rest of the blog stays on MongoDB.

@@ -1,19 +1,22 @@
 import { Suspense } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router';
-import { AudioLines, ExternalLink, FileText, Inbox, LogOut, Plus, Users } from 'lucide-react';
+import { AudioLines, ExternalLink, FileText, Inbox, LogOut, PenLine, Plus, Users } from 'lucide-react';
 import { Logo } from '../components/Navbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { usePostScope } from './editor/scope.js';
 
 const nav = [
   { to: '/admin', label: 'Posts', icon: FileText, end: true },
   { to: '/admin/subscribers', label: 'Subscribers', icon: Users },
   { to: '/admin/messages', label: 'Messages', icon: Inbox },
+  { to: '/admin/bloggers', label: 'Bloggers', icon: PenLine },
   { to: '/evaluate/console', label: 'Evaluation', icon: AudioLines },
 ];
 
 export function AddBlogButton({ className = '' }) {
+  const { base } = usePostScope();
   return (
-    <Link to="/admin/posts/new" className={`btn-dark ${className}`}>
+    <Link to={`${base}/posts/new`} className={`btn-dark ${className}`}>
       <Plus className="size-4" />
       Add post
     </Link>

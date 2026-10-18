@@ -86,10 +86,21 @@ test('subscribing sends one welcome email, at most once a day per address, and n
   assert.deepEqual(sent, [['reader@example.com', 'Welcome to VoiceLK']]);
   assert.ok(store.get('reader@example.com').welcomedAt);
 
-  // Already subscribed: nothing is sent.
+  // Already subscribed and already welcomed: nothing is sent.
   res = await subscribe('reader@example.com');
   assert.equal(res.message, 'You are already subscribed.');
   assert.equal(sent.length, 1);
+
+  // Subscribed while sending was failing, so never welcomed: entering the address
+  // again sends the welcome now, once.
+  store.set('missed@example.com', Object.assign(new Subscriber({ email: 'missed@example.com', unsubscribeToken: 'tok-missed' }), { status: 'active' }));
+  res = await subscribe('missed@example.com');
+  assert.equal(res.message, 'You are already subscribed. We have sent your welcome email.');
+  assert.deepEqual(sent.at(-1), ['missed@example.com', 'Welcome to VoiceLK']);
+  res = await subscribe('missed@example.com');
+  assert.equal(res.message, 'You are already subscribed.');
+  assert.equal(sent.filter(([to]) => to === 'missed@example.com').length, 1);
+  sent.length = 1;
 
   // Unsubscribed and back within a day: subscribed again, but no second email.
   store.get('reader@example.com').status = 'unsubscribed';

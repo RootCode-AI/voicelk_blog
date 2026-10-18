@@ -31,6 +31,8 @@ const postSchema = new Schema(
     tags: { type: [String], default: [] },
     section: { type: String, enum: ['journey', 'research'], default: 'journey' },
     author: { type: String, default: '', trim: true, maxlength: 120 },
+    // Set when a blogger wrote the post; a blogger can only see and change their own.
+    blogger: { type: Schema.Types.ObjectId, ref: 'Blogger', index: true },
     status: { type: String, enum: ['draft', 'published'], default: 'draft' },
     featured: { type: Boolean, default: false },
     publishedAt: { type: Date },

@@ -7,8 +7,6 @@ import { assertPublishedImageAlt } from '../lib/imageAlt.js';
 import { sectionFilter } from '../lib/postSections.js';
 import { postSections } from '../../../shared/postSections.js';
 
-const router = Router();
-
 export function slugify(text) {
   return String(text)
     .normalize('NFKD')
@@ -69,51 +67,92 @@ export async function applyBody(post, body) {
   }
 }
 
-router.get('/', async (req, res) => {
-  const filter = { ...sectionFilter(req.query.section), ...(['draft', 'published'].includes(req.query.status) ? { status: req.query.status } : {}) };
-  const posts = await Post.find(filter)
-    .select('title slug status section featured tags publishedAt updatedAt notifiedAt readingMinutes coverImage')
-    .sort({ updatedAt: -1 })
-    .lean();
-  res.json({ posts });
-});
+// Who may do what with posts. Admins work on every post; a blogger only ever sees
+// their own (another blogger's post simply does not exist for them), and cannot
+// feature posts on the home page or email subscribers.
+export const adminScope = {
+  own: () => ({}),
+  onCreate: (req, post) => {
+    post.author = req.admin.name;
+  },
+  canFeature: true,
+  canNotify: true,
+};
 
-router.get('/:id', async (req, res) => {
-  const post = await Post.findById(req.params.id).lean();
-  if (!post) throw notFound('Post not found');
-  res.json({ post });
-});
+export const bloggerScope = {
+  own: (req) => ({ blogger: req.blogger._id }),
+  onCreate: (req, post) => {
+    post.blogger = req.blogger._id;
+    post.author = req.blogger.name;
+  },
+  canFeature: false,
+  canNotify: false,
+};
 
-router.post('/', async (req, res) => {
-  const post = new Post({ author: req.admin.name });
-  await applyBody(post, req.body ?? {});
-  await post.save();
-  res.status(201).json({ post: post.toObject() });
-});
+export function createPostsRouter(scope) {
+  const router = Router();
+  const body = (req) => {
+    const value = { ...(req.body ?? {}) };
+    if (!scope.canFeature) delete value.featured;
+    return value;
+  };
+  const findOwn = (req) => Post.findOne({ _id: req.params.id, ...scope.own(req) });
 
-router.put('/:id', async (req, res) => {
-  const post = await Post.findById(req.params.id);
-  if (!post) throw notFound('Post not found');
-  await applyBody(post, req.body ?? {});
-  await post.save();
-  res.json({ post: post.toObject() });
-});
+  router.get('/', async (req, res) => {
+    const filter = {
+      ...scope.own(req),
+      ...sectionFilter(req.query.section),
+      ...(['draft', 'published'].includes(req.query.status) ? { status: req.query.status } : {}),
+    };
+    const posts = await Post.find(filter)
+      .select('title slug status section featured tags author blogger publishedAt updatedAt notifiedAt readingMinutes coverImage')
+      .sort({ updatedAt: -1 })
+      .lean();
+    res.json({ posts });
+  });
 
-router.delete('/:id', async (req, res) => {
-  const result = await Post.findByIdAndDelete(req.params.id);
-  if (!result) throw notFound('Post not found');
-  res.status(204).end();
-});
+  router.get('/:id', async (req, res) => {
+    const post = await findOwn(req).lean();
+    if (!post) throw notFound('Post not found');
+    res.json({ post });
+  });
 
-router.post('/:id/notify', async (req, res) => {
-  const post = await Post.findById(req.params.id);
-  if (!post) throw notFound('Post not found');
-  if (post.status !== 'published') throw new HttpError(409, 'Publish the post before emailing subscribers.');
+  router.post('/', async (req, res) => {
+    const post = new Post();
+    scope.onCreate(req, post);
+    await applyBody(post, body(req));
+    await post.save();
+    res.status(201).json({ post: post.toObject() });
+  });
 
-  const sent = await notifySubscribers(post);
-  post.notifiedAt = new Date();
-  await post.save();
-  res.json({ sent, notifiedAt: post.notifiedAt });
-});
+  router.put('/:id', async (req, res) => {
+    const post = await findOwn(req);
+    if (!post) throw notFound('Post not found');
+    await applyBody(post, body(req));
+    await post.save();
+    res.json({ post: post.toObject() });
+  });
 
-export default router;
+  router.delete('/:id', async (req, res) => {
+    const result = await Post.findOneAndDelete({ _id: req.params.id, ...scope.own(req) });
+    if (!result) throw notFound('Post not found');
+    res.status(204).end();
+  });
+
+  if (scope.canNotify) {
+    router.post('/:id/notify', async (req, res) => {
+      const post = await findOwn(req);
+      if (!post) throw notFound('Post not found');
+      if (post.status !== 'published') throw new HttpError(409, 'Publish the post before emailing subscribers.');
+
+      const sent = await notifySubscribers(post);
+      post.notifiedAt = new Date();
+      await post.save();
+      res.json({ sent, notifiedAt: post.notifiedAt });
+    });
+  }
+
+  return router;
+}
+
+export default createPostsRouter(adminScope);
