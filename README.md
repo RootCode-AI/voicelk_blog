@@ -41,6 +41,7 @@ cd "D:\RUSL\Final Project\TTS\blog"
 npm install
 copy server\.env.example server\.env        # then fill in MONGODB_URI and JWT_SECRET
 npm run create-admin -- you@example.com "a long password" "Your Name"
+# later: npm run delete-admin -- --list, then npm run delete-admin -- old@example.com
 npm run dev                                 # API on :5000, site on http://localhost:5173
 ```
 

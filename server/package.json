@@ -6,6 +6,7 @@
     "dev": "node --watch --env-file-if-exists=.env src/index.js",
     "start": "node --env-file-if-exists=.env src/index.js",
     "create-admin": "node --env-file-if-exists=.env scripts/create-admin.js",
+    "delete-admin": "node --env-file-if-exists=.env scripts/delete-admin.js",
     "create-evaluator": "node --env-file-if-exists=.env scripts/create-evaluator.js",
     "db:setup": "node --env-file-if-exists=.env scripts/setup-supabase.js"
   },
