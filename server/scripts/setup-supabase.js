@@ -21,8 +21,11 @@ if (!raw || /YOUR-PASSWORD|\[YOUR|replace/i.test(raw)) {
 }
 
 let connectionString;
+let directRef = null;
 try {
   const url = new URL(raw);
+  // db.<ref>.supabase.co only has an IPv6 address; most home networks need the pooler.
+  directRef = /^db\.([a-z0-9]+)\.supabase\.co$/.exec(url.hostname)?.[1] ?? null;
   // TLS is configured below; a sslmode in the URL would override it.
   url.searchParams.delete('sslmode');
   connectionString = url.toString();
@@ -72,7 +75,14 @@ try {
 } catch (err) {
   console.error(`Setup failed: ${err.message}`);
   const hint = HINTS[err.code] ?? (/Tenant or user not found/i.test(err.message) ? HINTS.XX000 : null);
-  if (hint) console.error(hint);
+  if (directRef && ['ENOTFOUND', 'ENETUNREACH', 'EHOSTUNREACH'].includes(err.code)) {
+    console.error(`SUPABASE_DB_URL uses the direct host db.${directRef}.supabase.co, which is IPv6-only and this network cannot reach it.
+In the dashboard: Connect > "Session pooler" (not "Direct connection"), and copy that URI instead. Two things change; the password and port 5432 stay:
+  user:  postgres  ->  postgres.${directRef}
+  host:  db.${directRef}.supabase.co  ->  aws-0-<region>.pooler.supabase.com (shown in the dialog)`);
+  } else if (hint) {
+    console.error(hint);
+  }
   process.exitCode = 1;
 } finally {
   await client.end().catch(() => {});
