@@ -20,7 +20,10 @@ test('the logo, icons and manifest are served from the generated brand files', a
   }
   const manifest = await (await request.get('/site.webmanifest')).json();
   expect(manifest.name).toBe('VoiceLK');
-  await expect(page.locator('link[rel="icon"][sizes="192x192"]')).toHaveAttribute('href', '/icon-192.png');
+  // Icon links carry a fingerprint of the file, so browsers fetch a changed icon at once.
+  await expect(page.locator('link[rel="icon"][sizes="192x192"]')).toHaveAttribute('href', /^\/icon-192\.png\?v=[0-9a-f]{10}$/);
+  await expect(page.locator('link[rel="icon"][sizes="32x32"]')).toHaveAttribute('href', /^\/favicon-32\.png\?v=[0-9a-f]{10}$/);
+  expect(manifest.icons.every((icon) => /\?v=[0-9a-f]{10}$/.test(icon.src))).toBe(true);
 });
 
 test('the bars speak on hover, rest afterwards, and stay still for reduced motion', async ({ page }) => {

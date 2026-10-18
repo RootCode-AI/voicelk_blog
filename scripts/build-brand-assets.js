@@ -1,4 +1,5 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
@@ -101,21 +102,29 @@ await (await inked(sharp(source).extract(LOGO).resize({ width: 480 }))).png({ co
 // Whole logo for places that cannot draw SVG bars: email, the social card, documents.
 await sharp(source).extract(LOGO).resize({ width: 960 }).png({ compressionLevel: 9 }).toFile(pub('brand/voicelk-logo.png'));
 
-// Square icons from the complete mark, bars included.
-const mark = await sharp(source).extract(MARK).png().toBuffer();
-async function icon(size, file, { padding = 0.08, background = { r: 0, g: 0, b: 0, alpha: 0 } } = {}) {
+// Square icons from the complete mark, bars included, in ink like the logo on the site.
+// Always on white: a black mark on a transparent favicon would vanish on dark tabs.
+const mark = await (await inked(sharp(source).extract(MARK))).png().toBuffer();
+async function icon(size, file, { padding = 0.08, radius = 0 } = {}) {
   const inner = Math.round(size * (1 - padding * 2));
   const art = await sharp(mark).resize({ width: inner, height: inner, fit: 'inside' }).toBuffer();
-  await sharp({ create: { width: size, height: size, channels: 4, background } })
+  const tile = radius
+    ? sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${radius}" fill="#ffffff"/></svg>`))
+    : sharp({ create: { width: size, height: size, channels: 4, background: '#ffffff' } });
+  await tile
     .composite([{ input: art, gravity: 'center' }])
     .png({ compressionLevel: 9 })
     .toFile(pub(file));
 }
-await icon(32, 'favicon-32.png', { padding: 0 });
-await icon(192, 'icon-192.png', { background: '#ffffff' });
-await icon(512, 'icon-512.png', { background: '#ffffff' });
-await icon(180, 'apple-touch-icon.png', { padding: 0.12, background: '#ffffff' });
+// The browser-tab icon is a rounded white tile, so it reads on light and dark tabs alike.
+await icon(32, 'favicon-32.png', { padding: 0.1, radius: 7 });
+await icon(192, 'icon-192.png');
+await icon(512, 'icon-512.png');
+await icon(180, 'apple-touch-icon.png', { padding: 0.12 });
 
+// Fingerprinted like the icon links in index.html (client/vite.config.js), so an
+// installed app picks up a changed icon.
+const version = async (file) => createHash('sha256').update(await readFile(pub(file))).digest('hex').slice(0, 10);
 await writeFile(pub('site.webmanifest'), `${JSON.stringify({
   name: 'VoiceLK',
   short_name: 'VoiceLK',
@@ -125,8 +134,8 @@ await writeFile(pub('site.webmanifest'), `${JSON.stringify({
   background_color: '#fcfcfc',
   theme_color: '#002251',
   icons: [
-    { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-    { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    { src: `/icon-192.png?v=${await version('icon-192.png')}`, sizes: '192x192', type: 'image/png' },
+    { src: `/icon-512.png?v=${await version('icon-512.png')}`, sizes: '512x512', type: 'image/png' },
   ],
 }, null, 2)}\n`);
 
