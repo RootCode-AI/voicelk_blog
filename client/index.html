@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Marks pages where the app will run, so CSS can hide the server-rendered fallback
+         instead of flashing it unstyled. Allowed by its hash in the CSP (server/src/app.js). -->
+    <script>document.documentElement.classList.add('js')</script>
     <!--seo:start-->
     <title>VoiceLK</title>
     <meta

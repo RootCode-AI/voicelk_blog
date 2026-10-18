@@ -414,3 +414,14 @@ test('search engines are told the site is called VoiceLK, with its logo, not the
   assert.match(template, /<meta name="application-name" content="VoiceLK" \/>/);
   assert.doesNotMatch(publicPages['/privacy'].intro, /voicelk\.dev/i);
 });
+
+test('the inline boot script is allowed by its exact hash, and nothing else inline is', async () => {
+  const { createHash } = await import('node:crypto');
+  const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
+  const inline = [...template.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  assert.equal(inline.length, 1, 'index.html should have exactly one inline script');
+  const hash = `'sha256-${createHash('sha256').update(inline[0]).digest('base64')}'`;
+  const app = await readFile(new URL('../src/app.js', import.meta.url), 'utf8');
+  assert.ok(app.includes(`BOOT_SCRIPT_HASH = "${hash}"`), `app.js must allow ${hash}`);
+  assert.match(app, /scriptSrc: \["'self'", BOOT_SCRIPT_HASH\]/);
+});

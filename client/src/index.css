@@ -482,6 +482,38 @@
   }
 }
 /* Readable server-rendered content remains available before JavaScript loads. */
+/* When the app is going to run (<html class="js">, set inline in index.html), that
+   plain fallback would flash unstyled until React replaces it. Hide it and show the
+   logo instead, after a short pause so fast loads show nothing at all. If the app has
+   not appeared after 5s (a script failed or was blocked), the fallback is revealed so
+   the page is never left blank. Delays, not durations, carry the timing because the
+   reduced-motion rule above shortens durations only. */
+html.js .seo-document {
+  visibility: hidden;
+  animation: seo-reveal 0s linear 5s forwards;
+}
+html.js #root:has(> .seo-document)::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: 180px;
+  height: 36px;
+  background: url('/brand/voicelk-logo.png') center / contain no-repeat;
+  opacity: 0;
+  animation:
+    seo-splash-in 0.4s var(--ease-out-soft) 0.3s forwards,
+    seo-splash-out 0s linear 5s forwards;
+}
+@keyframes seo-reveal {
+  to { visibility: visible; }
+}
+@keyframes seo-splash-in {
+  to { opacity: 1; }
+}
+@keyframes seo-splash-out {
+  to { opacity: 0; visibility: hidden; }
+}
 .seo-document { max-width: 52rem; margin: 3rem auto; padding: 0 1.5rem; line-height: 1.7; }
 .seo-document nav { margin-bottom: 2rem; }
 .seo-document h1 { font-size: 2.5rem; line-height: 1.2; margin: 1.5rem 0; }

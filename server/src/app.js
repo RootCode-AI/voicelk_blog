@@ -25,6 +25,9 @@ import { supabaseEnabled } from './supabase.js';
 const app = express();
 app.set('trust proxy', 1);
 
+// The one inline script in client/index.html, allowed by hash; a test keeps them in step.
+export const BOOT_SCRIPT_HASH = "'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='";
+
 let initialization;
 export function initializeApp() {
   initialization ??= connectDb(config.mongoUri)
@@ -49,7 +52,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", BOOT_SCRIPT_HASH],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
