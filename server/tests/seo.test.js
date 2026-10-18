@@ -18,15 +18,21 @@ import { sanitizeBlocks } from '../src/lib/blocks.js';
 import { postSections } from '../../shared/postSections.js';
 
 const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
-test('Vercel installs the build-only image dependency and its optional platform packages', async () => {
-  const config = JSON.parse(await readFile(new URL('../../vercel.json', import.meta.url), 'utf8'));
+test('Heroku builds the client, always installs the image dependency and starts the server', async () => {
   const manifest = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8'));
   const lock = JSON.parse(await readFile(new URL('../../package-lock.json', import.meta.url), 'utf8'));
-  assert.match(config.installCommand, /--include=dev\b/);
-  assert.match(config.installCommand, /--include=optional\b/);
-  assert.ok(manifest.devDependencies.sharp);
-  assert.equal(lock.packages[''].devDependencies.sharp, manifest.devDependencies.sharp);
+  const procfile = await readFile(new URL('../../Procfile', import.meta.url), 'utf8');
+  assert.match(procfile, /^web: npm start$/m);
+  // Heroku runs the root "build" script after installing. sharp is a regular dependency
+  // because the build needs it, and a NODE_ENV=production install skips dev dependencies.
+  assert.equal(manifest.scripts.build, 'npm run build -w client');
+  assert.equal(manifest.scripts.start, 'npm start -w server');
+  assert.match(manifest.engines.node, /^22\./);
+  assert.ok(manifest.dependencies.sharp);
+  assert.equal(manifest.devDependencies.sharp, undefined);
+  assert.equal(lock.packages[''].dependencies.sharp, manifest.dependencies.sharp);
   assert.ok(lock.packages['node_modules/sharp']);
+  for (const gone of ['../../vercel.json', '../../api/index.js']) assert.ok(!existsSync(new URL(gone, import.meta.url)), gone);
 });
 const post = {
   title: 'Sinhala & English speech', slug: 'sinhala-english', excerpt: 'A bilingual speech experiment.',
@@ -294,7 +300,7 @@ test('LLM endpoints return 503 on failure and preview responses remain noindex',
   });
 });
 
-test('production template works through Express and the Vercel entry point without connecting to MongoDB', {
+test('the production server renders pages, serves the built assets and compresses them, without MongoDB', {
   skip: !existsSync(new URL('../../client/dist/index.html', import.meta.url)) && 'Run npm run build for this smoke test',
 }, async () => {
   // Deliberately non-live configuration: these routes must not require a database.
@@ -302,36 +308,38 @@ test('production template works through Express and the Vercel entry point witho
   process.env.JWT_SECRET = 'seo-smoke-test-only-not-a-production-secret';
   // Never send real email from a test, even if it is run with server/.env loaded.
   process.env.RESEND_API_KEY = '';
-  process.env.VERCEL_ENV = 'production';
+  delete process.env.SITE_PREVIEW;
   const { default: app } = await import('../src/app.js');
-  const { default: handler } = await import('../../api/index.js');
-  for (const [listener, rewrite] of [[app, false], [handler, true]]) {
-    const server = createServer(listener).listen(0, '127.0.0.1');
-    await once(server, 'listening');
-    const base = `http://127.0.0.1:${server.address().port}`;
-    const url = (path) => base + (rewrite ? `/api/index?__page=${encodeURIComponent(path)}` : `/${path}`);
-    try {
-      const response = await fetch(url('about'));
-      assert.equal(response.status, 200);
-      const html = await response.text();
-      assert.match(html, /rel="canonical" href="https:\/\/voicelk.dev\/about"/);
-      assert.match(html, /<main class="seo-document">/);
-      assert.match(html, /src="\/assets\/index-[^"]+\.js"/);
-      assert.match(await (await fetch(url('robots.txt'))).text(), /Sitemap: https:\/\/voicelk.dev\/sitemap.xml/);
-      assert.equal((await fetch(url('nonexistent-page'))).status, 404);
-      assert.match(await (await fetch(url('about.md'))).text(), /# About VoiceLK/);
-      if (!rewrite) {
-        const image = await fetch(url('og-image.png'));
-        assert.equal(image.status, 200);
-        assert.match(image.headers.get('content-type'), /image\/png/);
-        const metadata = await sharp(Buffer.from(await image.arrayBuffer())).metadata();
-        assert.equal(metadata.width, 1200);
-        assert.equal(metadata.height, 630);
-      }
-    } finally {
-      server.closeAllConnections();
-      await new Promise((resolve) => server.close(resolve));
-    }
+  const server = createServer(app).listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const url = (path) => `http://127.0.0.1:${server.address().port}/${path}`;
+  try {
+    const response = await fetch(url('about'));
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /rel="canonical" href="https:\/\/voicelk.dev\/about"/);
+    assert.match(html, /<main class="seo-document">/);
+    assert.match(html, /src="\/assets\/index-[^"]+\.js"/);
+    assert.match(await (await fetch(url('robots.txt'))).text(), /Sitemap: https:\/\/voicelk.dev\/sitemap.xml/);
+    assert.equal((await fetch(url('nonexistent-page'))).status, 404);
+    assert.match(await (await fetch(url('about.md'))).text(), /# About VoiceLK/);
+
+    // The server delivers the built client itself, compressed and long-cached.
+    const script = await fetch(url(/src="\/(assets\/index-[^"]+\.js)"/.exec(html)[1]), { headers: { 'Accept-Encoding': 'gzip' } });
+    assert.equal(script.status, 200);
+    assert.equal(script.headers.get('content-encoding'), 'gzip');
+    assert.match(script.headers.get('cache-control'), /max-age=31536000/);
+    assert.equal((await fetch(url('brand/voicelk-book.webp'))).status, 200);
+
+    const image = await fetch(url('og-image.png'));
+    assert.equal(image.status, 200);
+    assert.match(image.headers.get('content-type'), /image\/png/);
+    const metadata = await sharp(Buffer.from(await image.arrayBuffer())).metadata();
+    assert.equal(metadata.width, 1200);
+    assert.equal(metadata.height, 630);
+  } finally {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
   }
 });
 

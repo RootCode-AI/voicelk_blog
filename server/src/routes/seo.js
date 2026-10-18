@@ -15,7 +15,7 @@ async function loadTemplate() {
 
 // Dependencies are injected so crawl behavior can be tested without a live database.
 export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate = loadTemplate,
-  origin = seoSite.url, preview = process.env.VERCEL_ENV === 'preview' }) {
+  origin = seoSite.url, preview = process.env.SITE_PREVIEW === 'true' }) {
   const router = Router();
   router.get('/robots.txt', (_req, res) => {
     res.type('text/plain').set('Cache-Control', 'public, max-age=300').send(renderRobots(origin, preview));

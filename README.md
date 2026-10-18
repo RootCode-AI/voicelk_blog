@@ -112,13 +112,13 @@ Setup:
    It creates the tables (row level security on, no public policies) and the
    `evaluation-audio` storage bucket, capped at 10 MB and audio types.
 2. Set `SUPABASE_URL`, `SUPABASE_SECRET_KEY` (the `sb_secret_…` key from Project
-   Settings → API Keys) and `FEEDBACK_IP_SECRET` in `server/.env` and in Vercel. The
+   Settings → API Keys) and `FEEDBACK_IP_SECRET` in `server/.env` and in Heroku Config Vars. The
    secret key is server-only. The publishable key and the JWKS URL aren't used: the
    browser never talks to Supabase directly, and the blog doesn't use Supabase Auth.
 3. Add evaluators from the console, or with
    `npm run create-evaluator -- rater@example.com "a long password" "Their Name"`.
 
-Audio never passes through the API, because Vercel functions accept at most 4.5 MB. The
+Audio never passes through the API, so 10 MB clips never occupy the server. The
 API checks the uploader's role, size and type and returns a signed upload URL, and the
 browser uploads straight to Supabase Storage. Before saving the clip, the API checks the
 stored object again.
@@ -192,11 +192,10 @@ Resend or `CONTACT_TO` credentials.
 ### Analytics
 
 Visitor analytics and its preference controls have been removed. The application
-does not load the Vercel Analytics SDK or send visitor analytics events. Hosting
+does not load any analytics SDK or send visitor analytics events. Hosting
 logs, external fonts/media and necessary administrator cookies are separate and
 are described in the Privacy Policy. Previously stored browser preferences are
-no longer read. This removal does not delete historical provider data or change
-Vercel dashboard settings; redeploy for the removal to reach visitors.
+no longer read. This removal does not delete historical provider data.
 
 ### Image accessibility
 
@@ -228,11 +227,10 @@ Twitter tags, structured data and readable HTML before JavaScript runs. React th
 enhances the page. Article snapshots include the published blocks, tables, captions
 and audio transcripts; only published posts are discoverable. Admin and newsletter
 pages return `noindex`, missing pages return HTTP 404, and temporary database failures
-return HTTP 503. Vercel preview deployments are also marked `noindex`.
+return HTTP 503. Set `SITE_PREVIEW=true` on a staging or review app to mark every page `noindex`.
 
 `/sitemap.xml` lists the home, journal, about and published article URLs with article
-modification dates. It updates from MongoDB automatically (up to five minutes of CDN
-cache). `/robots.txt` advertises it. Blog pagination has crawlable links and distinct
+modification dates. It updates from MongoDB automatically (cached for up to five minutes). `/robots.txt` advertises it. Blog pagination has crawlable links and distinct
 canonical URLs. Search and tag filters are not indexed.
 
 ### AI-readable content and social previews
@@ -250,34 +248,42 @@ canonical URLs. Search and tag filters are not indexed.
   Posts with valid cover images override it. Dimensions are declared only for the
   known-size default, and both formats include image alt text.
 - Edit `assets/og-image.svg` to change the default social card. The client `prebuild`
-  and `predev` scripts use the Sharp development dependency to generate the PNG;
-  Vite copies it into `client/dist`. Install dev dependencies for builds (`npm ci`).
-  The server only serves the finished image; it does not need Sharp at runtime.
+  and `predev` scripts use Sharp to generate the PNG; Vite copies it into `client/dist`.
+  Sharp is a regular dependency, not a dev one, so production-mode installs (which skip
+  dev dependencies) can still build. The server only serves the finished image.
 - The sitemap includes published cover images using Google's image sitemap namespace.
   WebSite/Organization structured data stays consistent during client navigation.
 
-The LLM guide and Markdown content are served dynamically on Vercel through the
-existing catch-all function route, and on standalone Express hosting. The social
-card is served as a static file. These features do not require public database secrets.
+The LLM guide and Markdown content are served dynamically by the Express server. The
+social card is served as a static file. These features do not require public database secrets.
 
-Deploy the **repository root** as one Vercel project using the included `vercel.json`.
-The function must include `client/dist/index.html`; the configuration already declares
-this. Deploying only the static `client` folder bypasses server SEO and article status
-codes. On standalone hosting, run `npm run build` and `npm start`.
+## Deploying to Heroku
 
-Vercel uses `npm ci --include=dev --include=optional` for the build installation.
-Keep these flags: the OG-image generator imports the build-only `sharp` dependency,
-and Sharp uses platform-specific optional packages. Plain `npm ci` can omit dev
-dependencies when `NODE_ENV=production` or npm omit settings are present, causing
-`ERR_MODULE_NOT_FOUND: Cannot find package 'sharp'` during `prebuild`. Keep production
-mode enabled; explicitly include build dependencies instead. See
-[npm's include/omit behaviour](https://docs.npmjs.com/cli/v11/commands/npm-ci/#include).
-No dependency version or lockfile change is required for this installation fix.
+The whole site runs as one Node process: Express renders every page (with its SEO
+metadata) and serves the built client, the brand images and the API. Deploy the
+**repository root**; the `Procfile` starts it with `npm start`.
 
-If this error occurs, push the updated `vercel.json` and deploy that new commit.
-Confirm the build log's install command contains both include flags. The repository
-pins Node 22; set the Vercel project's Node version to 22.x to remove the harmless
-warning about a conflicting project default. That warning is not the Sharp error.
+1. **Create the app:** Heroku Dashboard → New → Create new app.
+2. **Config Vars** (Settings → Reveal Config Vars): everything in `server/.env.example`
+   except `SUPABASE_DB_URL` and `SUPABASE_DB_CA`, which are for local setup only and hold
+   the database password. Set `NODE_ENV=production`, and `PUBLIC_URL` and `CLIENT_ORIGIN`
+   to the app's address (`https://<app>.herokuapp.com`, or `https://voicelk.dev` once the
+   domain is attached). Heroku sets `PORT` itself.
+3. **MongoDB Atlas → Network Access:** allow `0.0.0.0/0`; Heroku has no fixed IP addresses.
+4. **Deploy:** Deploy → GitHub → connect the repository → choose the branch → Deploy
+   Branch (or turn on automatic deploys). Heroku installs the dependencies, runs the root
+   `build` script (which generates the brand images, icons and social card with `sharp`,
+   then builds the client), and prunes dev dependencies.
+5. **Check** `https://<app>.herokuapp.com/api/health`: it should report
+   `{"ok":true,"mail":"resend","evaluation":"supabase"}`. If a page says "temporarily
+   unavailable", More → View logs shows the `[error]` line with the database error.
+6. **Custom domain:** Settings → Domains → Add `voicelk.dev`, point your DNS at the target
+   Heroku shows, turn on Automatic Certificate Management, then update `PUBLIC_URL` and
+   `CLIENT_ORIGIN` to `https://voicelk.dev`.
+
+In production the server redirects plain `http://` to `https://` (Heroku's router accepts
+both) and compresses its responses; built scripts and styles are cached for a year.
+Node 22 is pinned in `package.json`. On any other host, run `npm run build` and `npm start`.
 
 Run `npm run test:seo` and `npm run build` before deploying. After deploying:
 
@@ -287,7 +293,7 @@ Run `npm run test:seo` and `npm run build` before deploying. After deploying:
    and submit `https://voicelk.dev/sitemap.xml`. Use URL Inspection for the homepage and
    a published post, and test the post with Google's Rich Results Test.
 3. Set your hosting provider's preferred domain to `voicelk.dev` and redirect alternate
-   production domains to it. Keep Vercel previews protected.
+   production domains to it. Keep staging apps on `SITE_PREVIEW=true`.
 4. Give posts descriptive titles, unique excerpts, real author names, cover-image alt
    text and useful internal links. Include transcripts alongside speech samples.
 
