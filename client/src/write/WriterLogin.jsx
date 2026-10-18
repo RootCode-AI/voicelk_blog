@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useLocation, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { Loader2, LogIn } from 'lucide-react';
 import { Logo } from '../components/Navbar.jsx';
@@ -75,13 +75,6 @@ export default function WriterLogin() {
             Sign in
           </button>
         </motion.form>
-        <motion.p variants={fadeUp} className="mt-6 text-center text-sm text-muted">
-          Administrators sign in to the{' '}
-          <Link to="/admin/login" className="font-medium text-ink underline underline-offset-4">
-            admin panel
-          </Link>{' '}
-          instead.
-        </motion.p>
       </motion.div>
     </div>
   );

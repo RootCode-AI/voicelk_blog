@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router';
-import { AudioLines, ExternalLink, LayoutDashboard, LogOut, UserCog } from 'lucide-react';
+import { AudioLines, ExternalLink, LogOut, UserCog } from 'lucide-react';
 import { Logo } from '../components/Navbar.jsx';
 import { RequireEvaluator, useEvaluateAuth } from './EvaluateAuth.jsx';
 
@@ -38,12 +38,6 @@ function Layout() {
             <NavLink to="/evaluate/console/evaluators" className={linkClass}>
               <UserCog className="size-4" />
               Evaluators
-            </NavLink>
-          )}
-          {isAdmin && (
-            <NavLink to="/admin" className={linkClass}>
-              <LayoutDashboard className="size-4" />
-              Blog admin
             </NavLink>
           )}
           <a href="/evaluate" target="_blank" rel="noreferrer" className={linkClass({ isActive: false })}>

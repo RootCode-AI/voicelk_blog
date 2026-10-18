@@ -6,7 +6,6 @@ import { badRequest, notFound } from '../lib/errors.js';
 import { welcomeEmail } from '../lib/emails.js';
 import { sendMail } from '../lib/mailer.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { config } from '../config.js';
 
 const router = Router();
 
@@ -45,7 +44,7 @@ router.post('/', subscribeLimiter, async (req, res) => {
   if (due) {
     try {
       // Awaited, so the response reports whether the email actually went out.
-      await sendMail({ to: email, replyTo: config.mail.contactTo || undefined, ...welcomeEmail(subscriber.unsubscribeToken) });
+      await sendMail({ to: email, ...welcomeEmail(subscriber.unsubscribeToken) });
       subscriber.welcomedAt = new Date();
       await subscriber.save();
       welcomed = true;

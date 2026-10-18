@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useLocation, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { Loader2, LogIn } from 'lucide-react';
 import { Logo } from '../components/Navbar.jsx';
@@ -75,13 +75,6 @@ export default function EvaluateLogin() {
             Sign in
           </button>
         </motion.form>
-        <motion.p variants={fadeUp} className="mt-6 text-center text-sm text-muted">
-          Evaluator accounts open this console only; the{' '}
-          <Link to="/admin/login" className="font-medium text-ink underline underline-offset-4">
-            blog admin
-          </Link>{' '}
-          needs an administrator account.
-        </motion.p>
       </motion.div>
     </div>
   );
