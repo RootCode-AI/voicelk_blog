@@ -329,7 +329,14 @@ test('the production server renders pages, serves the built assets and compresse
     assert.equal(script.status, 200);
     assert.equal(script.headers.get('content-encoding'), 'gzip');
     assert.match(script.headers.get('cache-control'), /max-age=31536000/);
-    assert.equal((await fetch(url('brand/voicelk-book.webp'))).status, 200);
+    // Logo images are re-checked on every visit, so a new logo shows at once.
+    const logo = await fetch(url('brand/voicelk-book.webp'));
+    assert.equal(logo.status, 200);
+    assert.match(logo.headers.get('cache-control'), /max-age=0\b/);
+    // Icon links carry the fingerprint of the exact file being served.
+    const { createHash } = await import('node:crypto');
+    const icon = Buffer.from(await (await fetch(url('favicon-32.png'))).arrayBuffer());
+    assert.ok(html.includes(`href="/favicon-32.png?v=${createHash('sha256').update(icon).digest('hex').slice(0, 10)}"`));
 
     const image = await fetch(url('og-image.png'));
     assert.equal(image.status, 200);

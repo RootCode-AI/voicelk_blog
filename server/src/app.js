@@ -129,12 +129,15 @@ app.use('/api/media', mediaRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/evaluate', evaluateRoutes);
-// The built client: fingerprinted bundles are cached for a year, brand images and
-// icons for a day. Pages themselves go through the SEO router below.
+// The built client: fingerprinted bundles are cached for a year; icons for a day (the
+// page links them with a content fingerprint, so a changed icon is a new address).
+// Pages themselves go through the SEO router below.
 const clientDist = fileURLToPath(new URL('../../client/dist/', import.meta.url));
 if (fs.existsSync(clientDist)) {
   app.use('/assets', express.static(`${clientDist}/assets`, { immutable: true, maxAge: '1y' }));
-  app.use('/brand', express.static(`${clientDist}/brand`, { maxAge: '1d' }));
+  // Brand images keep their names when the logo changes, so browsers re-check them on
+  // each visit (a cheap 304 when unchanged) instead of showing an old logo for a day.
+  app.use('/brand', express.static(`${clientDist}/brand`, { maxAge: 0 }));
   for (const file of ['favicon-32.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'site.webmanifest']) {
     app.get(`/${file}`, (_req, res) => res.sendFile(`${clientDist}/${file}`, { maxAge: '1d' }));
   }
