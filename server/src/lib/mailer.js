@@ -5,8 +5,10 @@ const resend = config.mail.resendApiKey ? new Resend(config.mail.resendApiKey) :
 
 export const mailEnabled = Boolean(resend);
 
-if (!resend) {
-  console.info('[mail] RESEND_API_KEY is not set — emails will be printed to the console instead of sent.');
+// Tests run without server/.env on purpose, so they can never email anyone; the
+// notice would only be noise there.
+if (!resend && !process.env.NODE_TEST_CONTEXT) {
+  console.info('[mail] RESEND_API_KEY is not set in server/.env — emails will be printed to the console instead of sent.');
 }
 
 function logInstead(message) {

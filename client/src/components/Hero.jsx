@@ -2,7 +2,6 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import { fadeUp, stagger } from './motion/Reveal.jsx';
 import NewsletterForm from './NewsletterForm.jsx';
 import WaveBackdrop from './WaveBackdrop.jsx';
-import { BrandMark } from './Brand.jsx';
 import { site } from '../site.config.js';
 
 const HERO_VIDEO = import.meta.env.VITE_HERO_VIDEO_URL;
@@ -40,10 +39,6 @@ export default function Hero() {
         animate="show"
         variants={stagger(0.1)}
       >
-        <motion.div variants={fadeUp} className="group mb-6 sm:mb-8">
-          <BrandMark voice="intro" className="h-14 w-auto sm:h-[4.5rem]" />
-        </motion.div>
-
         <motion.div variants={fadeUp}>
           <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-line bg-white/80 py-1.5 pl-1.5 pr-3 text-xs shadow-card backdrop-blur sm:gap-3 sm:pr-4 sm:text-sm">
             <span className="flex shrink-0 -space-x-1.5" aria-hidden="true">

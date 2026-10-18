@@ -300,6 +300,8 @@ test('production template works through Express and the Vercel entry point witho
   // Deliberately non-live configuration: these routes must not require a database.
   process.env.MONGODB_URI = 'mongodb://127.0.0.1:1/seo-smoke-test';
   process.env.JWT_SECRET = 'seo-smoke-test-only-not-a-production-secret';
+  // Never send real email from a test, even if it is run with server/.env loaded.
+  process.env.RESEND_API_KEY = '';
   process.env.VERCEL_ENV = 'production';
   const { default: app } = await import('../src/app.js');
   const { default: handler } = await import('../../api/index.js');
