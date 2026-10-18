@@ -15,11 +15,13 @@
     "test:access": "node --test server/tests/access.test.js",
     "test:emails": "node --test server/tests/emails.test.js",
     "test:config": "node --test server/tests/config.test.js",
+    "test:bloggers": "node --test server/tests/bloggers.test.js",
     "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm start -w server",
     "create-admin": "npm run create-admin -w server --",
     "delete-admin": "npm run delete-admin -w server --",
+    "create-blogger": "npm run create-blogger -w server --",
     "create-evaluator": "npm run create-evaluator -w server --",
     "db:setup": "npm run db:setup -w server"
   },

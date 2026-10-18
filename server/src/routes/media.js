@@ -7,6 +7,7 @@ import { config } from '../config.js';
 import { mediaBucket } from '../db.js';
 import { badRequest, notFound } from '../lib/errors.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { requireAdminOrBlogger } from '../middleware/blogger.js';
 
 const router = Router();
 
@@ -19,12 +20,13 @@ const upload = multer({
     ALLOWED.test(file.mimetype) ? cb(null, true) : cb(badRequest(`Files of type ${file.mimetype} cannot be uploaded`)),
 });
 
-router.post('/', requireAdmin, upload.single('file'), async (req, res) => {
+// Bloggers upload images and audio for their posts too; deleting files stays admin-only.
+router.post('/', requireAdminOrBlogger, upload.single('file'), async (req, res) => {
   if (!req.file) throw badRequest('Choose a file to upload');
 
   const { originalname, mimetype, buffer, size } = req.file;
   const stream = mediaBucket().openUploadStream(originalname, {
-    metadata: { contentType: mimetype, uploadedBy: req.admin._id },
+    metadata: { contentType: mimetype, uploadedBy: (req.admin ?? req.blogger)._id, uploaderRole: req.admin ? 'admin' : 'blogger' },
   });
   await pipeline(Readable.from(buffer), stream);
 

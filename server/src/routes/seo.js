@@ -71,7 +71,7 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
     const path = req.path;
     const page = /^\d+$/.test(String(req.query.page ?? '')) ? Math.min(10000, Math.max(1, Number(req.query.page))) : 1;
     const filtered = isPostListing(path) && Boolean(req.query.q || req.query.tag);
-    const privatePage = /^\/admin(?:\/|$)/.test(path) || isEvaluateConsolePath(path) || ['/newsletter/confirm', '/newsletter/unsubscribe'].includes(path);
+    const privatePage = /^\/(admin|write)(?:\/|$)/.test(path) || isEvaluateConsolePath(path) || ['/newsletter/confirm', '/newsletter/unsubscribe'].includes(path);
     let post;
     let posts = [];
     let hasMore = false;

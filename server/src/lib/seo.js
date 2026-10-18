@@ -6,7 +6,7 @@ export const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g,
 export const safeJson = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 
 export function pageMetadata({ path, post, status = 200, page = 1, filtered = false, preview = false, origin = seoSite.url }) {
-  const privatePage = path.startsWith('/admin') || path.startsWith('/newsletter/') || isEvaluateConsolePath(path);
+  const privatePage = path.startsWith('/admin') || path.startsWith('/write') || path.startsWith('/newsletter/') || isEvaluateConsolePath(path);
   const canonicalPath = isPostListing(path) && page > 1 && !filtered ? `${path}?page=${page}` : path;
   const canonical = absoluteUrl(canonicalPath, origin);
   const defaults = seoPages[path] ?? unlistedPages[path];

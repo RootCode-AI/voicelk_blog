@@ -61,3 +61,79 @@ test('in production, plain http is redirected to https and https is served', () 
   assert.equal(result.post, 308);
   assert.equal(result.secure, 200);
 });
+
+test("health reports when mail goes through Resend's test sender, which only reaches the account owner", () => {
+  const mailerUrl = new URL('../src/lib/mailer.js', import.meta.url).href;
+  const mode = (MAIL_FROM, RESEND_API_KEY = 're_test_not_a_real_key') => {
+    const out = execFileSync(process.execPath, ['--input-type=module', '-e', `const m = await import(${JSON.stringify(mailerUrl)}); console.log(m.mailMode);`], {
+      env: { ...process.env, MONGODB_URI: 'mongodb://127.0.0.1:1/x', JWT_SECRET: 'config-test', RESEND_API_KEY, MAIL_FROM },
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return out.toString().trim().split('\n').pop();
+  };
+  assert.equal(mode('VoiceLK <onboarding@resend.dev>'), 'resend-test-sender');
+  assert.equal(mode('VoiceLK <hello@voicelk.dev>'), 'resend');
+  assert.equal(mode('VoiceLK <hello@voicelk.dev>', ''), 'console');
+});
+
+test('with a Gmail app password set, mail goes out through SMTP from that Gmail address', async () => {
+  const { createServer } = await import('node:net');
+  const { once } = await import('node:events');
+  // A minimal SMTP server that accepts one login and one message, and records it.
+  const received = { auth: '', from: '', to: [], data: '' };
+  const smtpServer = createServer((socket) => {
+    let inData = false;
+    let buffer = '';
+    socket.write('220 test ESMTP\r\n');
+    socket.on('data', (chunk) => {
+      buffer += chunk.toString();
+      let i;
+      while ((i = buffer.indexOf('\r\n')) >= 0) {
+        const line = buffer.slice(0, i);
+        buffer = buffer.slice(i + 2);
+        if (inData) {
+          if (line === '.') { inData = false; socket.write('250 queued\r\n'); } else received.data += `${line}\n`;
+        } else if (/^(EHLO|HELO)/i.test(line)) socket.write('250-test\r\n250 AUTH PLAIN LOGIN\r\n');
+        else if (/^AUTH PLAIN/i.test(line)) { received.auth = Buffer.from(line.split(' ')[2], 'base64').toString(); socket.write('235 ok\r\n'); }
+        else if (/^MAIL FROM/i.test(line)) { received.from = line; socket.write('250 ok\r\n'); }
+        else if (/^RCPT TO/i.test(line)) { received.to.push(line); socket.write('250 ok\r\n'); }
+        else if (/^DATA/i.test(line)) { inData = true; socket.write('354 go\r\n'); }
+        else if (/^QUIT/i.test(line)) { socket.end('221 bye\r\n'); }
+        else socket.write('250 ok\r\n');
+      }
+    });
+  }).listen(0, '127.0.0.1');
+  await once(smtpServer, 'listening');
+
+  const mailerUrl = new URL('../src/lib/mailer.js', import.meta.url).href;
+  const { spawn } = await import('node:child_process');
+  const child = spawn(process.execPath, ['--input-type=module', '-e', `
+    const m = await import(${JSON.stringify(mailerUrl)});
+    console.log(JSON.stringify({ mode: m.mailMode, from: m.fromAddress }));
+    await m.sendMail({ to: 'reader@example.com', subject: 'Welcome to VoiceLK', text: 'Hello', html: '<p>Hello</p>', replyTo: 'rootcode.projects@gmail.com' });
+    console.log('sent');`], {
+    env: { ...process.env, MONGODB_URI: 'mongodb://127.0.0.1:1/x', JWT_SECRET: 'config-test', RESEND_API_KEY: 're_should_be_ignored',
+      MAIL_FROM: 'VoiceLK <onboarding@resend.dev>', SMTP_HOST: '127.0.0.1', SMTP_PORT: String(smtpServer.address().port),
+      SMTP_USER: 'rootcode.projects@gmail.com', SMTP_PASS: 'abcd efgh ijkl mnop' },
+    cwd: fileURLToPath(new URL('..', import.meta.url)),
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let out = '';
+  child.stdout.on('data', (d) => { out += d; });
+  child.stderr.on('data', (d) => { out += d; });
+  await once(child, 'exit');
+  smtpServer.close();
+
+  const info = JSON.parse(out.split('\n').find((l) => l.startsWith('{')));
+  assert.equal(info.mode, 'smtp', 'SMTP wins over Resend when both are set');
+  assert.equal(info.from, 'VoiceLK <rootcode.projects@gmail.com>');
+  assert.match(out, /^sent$/m, out);
+  // The app password is used without the spaces Google shows it with.
+  assert.equal(received.auth, '\u0000rootcode.projects@gmail.com\u0000abcdefghijklmnop');
+  assert.match(received.from, /<rootcode\.projects@gmail\.com>/);
+  assert.match(received.to[0], /<reader@example\.com>/);
+  assert.match(received.data, /^From: VoiceLK <rootcode\.projects@gmail\.com>$/m);
+  assert.match(received.data, /^Reply-To: rootcode\.projects@gmail\.com$/m);
+  assert.match(received.data, /^Subject: Welcome to VoiceLK$/m);
+});

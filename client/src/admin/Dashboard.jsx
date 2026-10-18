@@ -7,6 +7,7 @@ import { useApi } from '../hooks/useApi.js';
 import { api } from '../lib/api.js';
 import { formatShortDate, timeAgo } from '../lib/format.js';
 import { postSections, sectionForPost } from '../../../shared/postSections.js';
+import { usePostScope } from './editor/scope.js';
 
 function Stat({ label, value, hint }) {
   return (
@@ -18,6 +19,13 @@ function Stat({ label, value, hint }) {
   );
 }
 
+const MAIL_STATUS = {
+  smtp: 'mail via Gmail',
+  resend: 'mail via Resend',
+  'resend-test-sender': 'Resend test sender: only your own address gets email. Verify your domain in Resend.',
+  console: 'mail printed to the server console (no API key)',
+};
+
 const FILTERS = [
   { value: '', label: 'All' },
   { value: 'published', label: 'Published' },
@@ -26,17 +34,26 @@ const FILTERS = [
 
 export default function Dashboard() {
   const toast = useToast();
+  const scope = usePostScope();
   const [filter, setFilter] = useState('');
   const [section, setSection] = useState('');
-  const { data: stats, reload: reloadStats } = useApi('/admin/stats');
-  const { data, loading, error, reload } = useApi(`/admin/posts?${new URLSearchParams({ ...(filter && { status: filter }), ...(section && { section }) })}`);
+  // Site-wide numbers (subscribers included) are for administrators only.
+  const { data: siteStats, reload: reloadSiteStats } = useApi(scope.canNotify ? '/admin/stats' : null);
+  const { data, loading, error, reload } = useApi(`${scope.api}?${new URLSearchParams({ ...(filter && { status: filter }), ...(section && { section }) })}`);
+  // A blogger's own counts come from their unfiltered list.
+  const { data: own, reload: reloadOwn } = useApi(scope.canNotify ? null : scope.api);
+  const stats = siteStats ?? (own && {
+    published: own.posts.filter((p) => p.status === 'published').length,
+    drafts: own.posts.filter((p) => p.status === 'draft').length,
+  });
+  const reloadStats = scope.canNotify ? reloadSiteStats : reloadOwn;
   const [busy, setBusy] = useState(null);
 
   async function remove(post) {
     if (!window.confirm(`Delete “${post.title}”? This cannot be undone.`)) return;
     setBusy(post._id);
     try {
-      await api.del(`/admin/posts/${post._id}`);
+      await api.del(`${scope.api}/${post._id}`);
       toast.success('Post deleted');
       reload();
       reloadStats();
@@ -52,7 +69,7 @@ export default function Dashboard() {
     if (!window.confirm(`Email “${post.title}” to ${stats?.subscribers ?? 'all'} subscribers?${again}`)) return;
     setBusy(post._id);
     try {
-      const { sent } = await api.post(`/admin/posts/${post._id}/notify`);
+      const { sent } = await api.post(`${scope.api}/${post._id}/notify`);
       toast.success(`Sent to ${sent} ${sent === 1 ? 'subscriber' : 'subscribers'}`);
       reload();
     } catch (err) {
@@ -68,23 +85,25 @@ export default function Dashboard() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 md:py-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">Admin</p>
-          <h1 className="mt-1 font-serif text-5xl">Posts</h1>
+          <p className="eyebrow">{scope.eyebrow}</p>
+          <h1 className="mt-1 font-serif text-5xl">{scope.heading}</h1>
         </div>
         <AddBlogButton />
       </header>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className={`mt-8 grid gap-4 ${scope.canNotify ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         <Stat label="Published" value={stats?.published} />
         <Stat label="Drafts" value={stats?.drafts} />
-        <Stat
-          label="Subscribers"
-          value={stats?.subscribers}
-          hint={
-            stats &&
-            `${stats.pending} awaiting confirmation · mail via ${stats.mail === 'resend' ? 'Resend' : 'console (no API key)'}`
-          }
-        />
+        {scope.canNotify && (
+          <Stat
+            label="Subscribers"
+            value={stats?.subscribers}
+            hint={
+              stats &&
+              `${stats.pending} awaiting confirmation · ${MAIL_STATUS[stats.mail] ?? 'mail status unknown'}`
+            }
+          />
+        )}
       </div>
 
       <div className="mt-8 max-w-sm">
@@ -133,7 +152,7 @@ export default function Dashboard() {
           <ul className="divide-y divide-line">
             {posts.map((post) => (
               <li key={post._id} className="flex flex-wrap items-center gap-4 px-5 py-4 transition-colors hover:bg-paper">
-                <Link to={`/admin/posts/${post._id}`} className="min-w-0 flex-1">
+                <Link to={`${scope.base}/posts/${post._id}`} className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-medium text-slate">{sectionForPost(post).label}</span>
                     <span
@@ -154,11 +173,12 @@ export default function Dashboard() {
                     {post.status === 'published' ? `Published ${formatShortDate(post.publishedAt)} · ` : ''}
                     Edited {timeAgo(post.updatedAt)}
                     {post.tags?.length ? ` · ${post.tags.join(', ')}` : ''}
+                    {scope.showAuthors && post.blogger ? ` · by ${post.author || 'a blogger'} (blogger)` : ''}
                   </p>
                 </Link>
                 <div className="flex items-center gap-1">
                   {busy === post._id && <Loader2 className="mr-2 size-4 animate-spin text-muted" />}
-                  <Link to={`/admin/posts/${post._id}`} className="btn-icon" title="Edit" aria-label="Edit">
+                  <Link to={`${scope.base}/posts/${post._id}`} className="btn-icon" title="Edit" aria-label="Edit">
                     <Pencil className="size-4" />
                   </Link>
                   {post.status === 'published' && (
@@ -166,9 +186,11 @@ export default function Dashboard() {
                       <a href={`/blog/${post.slug}`} target="_blank" rel="noreferrer" className="btn-icon" title="View" aria-label="View">
                         <ExternalLink className="size-4" />
                       </a>
-                      <button onClick={() => notify(post)} className="btn-icon" title="Email subscribers" aria-label="Email subscribers" disabled={busy === post._id}>
-                        <Mail className="size-4" />
-                      </button>
+                      {scope.canNotify && (
+                        <button onClick={() => notify(post)} className="btn-icon" title="Email subscribers" aria-label="Email subscribers" disabled={busy === post._id}>
+                          <Mail className="size-4" />
+                        </button>
+                      )}
                     </>
                   )}
                   <button onClick={() => remove(post)} className="btn-icon hover:text-danger!" title="Delete" aria-label="Delete" disabled={busy === post._id}>

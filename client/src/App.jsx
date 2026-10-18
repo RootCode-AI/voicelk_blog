@@ -19,6 +19,10 @@ const Dashboard = lazy(() => import('./admin/Dashboard.jsx'));
 const PostEditor = lazy(() => import('./admin/editor/PostEditor.jsx'));
 const Subscribers = lazy(() => import('./admin/Subscribers.jsx'));
 const Messages = lazy(() => import('./admin/Messages.jsx'));
+const Bloggers = lazy(() => import('./admin/Bloggers.jsx'));
+const WriterRoot = lazy(() => import('./write/WriterRoot.jsx'));
+const WriterLogin = lazy(() => import('./write/WriterLogin.jsx'));
+const WriterLayout = lazy(() => import('./write/WriterLayout.jsx'));
 const Login = lazy(() => import('./admin/Login.jsx'));
 const RequireAdmin = lazy(() => import('./admin/RequireAdmin.jsx'));
 const Evaluate = lazy(() => import('./pages/Evaluate.jsx'));
@@ -90,6 +94,22 @@ const router = createBrowserRouter([
               { path: 'posts/:id', element: <PostEditor /> },
               { path: 'subscribers', element: <Subscribers /> },
               { path: 'messages', element: <Messages /> },
+              { path: 'bloggers', element: <Bloggers /> },
+            ],
+          },
+        ],
+      },
+      {
+        element: <WriterRoot />,
+        children: [
+          { path: '/write/login', element: <WriterLogin /> },
+          {
+            path: '/write',
+            element: <WriterLayout />,
+            children: [
+              { index: true, element: <Dashboard /> },
+              { path: 'posts/new', element: <PostEditor /> },
+              { path: 'posts/:id', element: <PostEditor /> },
             ],
           },
         ],
