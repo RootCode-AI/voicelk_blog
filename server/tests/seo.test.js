@@ -62,7 +62,7 @@ test('public copy presents VoiceLK as a product with research origins', async ()
     }
     const home = await (await fetch(base + '/')).text();
     assert.match(home, /text-to-speech product built from research/);
-    assert.match(home, /VoiceLK \| Sinhala-English Text to Speech/);
+    assert.match(home, /<title>VoiceLK<\/title>/);
     const faq = await (await fetch(base + '/faq')).text();
     assert.match(faq, /It grew out of research/);
     assert.match(faq, /does not currently include a public speech-generation interface/);
@@ -409,7 +409,7 @@ test('search engines are told the site is called VoiceLK, with its logo, not the
   }
   const meta = renderHead(pageMetadata({ path: '/' }));
   assert.match(meta, /og:site_name" content="VoiceLK"/);
-  assert.match(meta, /<title>VoiceLK \| Sinhala-English Text to Speech<\/title>/);
+  assert.match(meta, /<title>VoiceLK<\/title>/);
   const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
   assert.match(template, /<meta name="application-name" content="VoiceLK" \/>/);
   assert.doesNotMatch(publicPages['/privacy'].intro, /voicelk\.dev/i);

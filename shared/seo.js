@@ -4,7 +4,8 @@ import { postSections, isPostListing, sectionForPost } from './postSections.js';
 export const seoSite = {
   name: 'VoiceLK',
   url: 'https://voicelk.dev',
-  title: 'VoiceLK | Sinhala-English Text to Speech',
+  // The home page's title. Other pages read "<Page> | VoiceLK".
+  title: 'VoiceLK',
   description: 'VoiceLK is a Sinhala-English text-to-speech product built from research, bringing mixed-language text to life as speech.',
   publisher: 'VoiceLK Team',
   // Other names people may search for; the site itself is always "VoiceLK".
