@@ -3,12 +3,18 @@ import crypto from 'node:crypto';
 import rateLimit from 'express-rate-limit';
 import { Subscriber } from '../models/Subscriber.js';
 import { badRequest, notFound } from '../lib/errors.js';
+import { welcomeEmail } from '../lib/emails.js';
+import { sendMail } from '../lib/mailer.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const token = () => crypto.randomBytes(24).toString('hex');
+
+// Anyone can type any address into the form, so one address gets at most one
+// welcome email a day, however often it is unsubscribed and subscribed again.
+const WELCOME_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 const subscribeLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 8, standardHeaders: 'draft-8', legacyHeaders: false });
 
@@ -26,9 +32,26 @@ router.post('/', subscribeLimiter, async (req, res) => {
   subscriber.confirmedAt = new Date();
   subscriber.confirmToken = undefined;
   subscriber.lastConfirmSentAt = undefined;
+  // Saved first, so the subscription stands even if the email provider is down.
   await subscriber.save();
 
-  res.status(201).json({ status: 'active', message: 'You are subscribed.' });
+  let welcomed = false;
+  if (!subscriber.welcomedAt || Date.now() - subscriber.welcomedAt.getTime() > WELCOME_INTERVAL_MS) {
+    try {
+      // Awaited: a serverless function may be frozen as soon as it responds.
+      await sendMail({ to: email, ...welcomeEmail(subscriber.unsubscribeToken) });
+      subscriber.welcomedAt = new Date();
+      await subscriber.save();
+      welcomed = true;
+    } catch (err) {
+      console.error('[subscribe] welcome email failed; the subscription is saved', err);
+    }
+  }
+
+  res.status(201).json({
+    status: 'active',
+    message: welcomed ? 'You are subscribed. A welcome email is on its way.' : 'You are subscribed.',
+  });
 });
 
 router.post('/confirm', async (req, res) => {

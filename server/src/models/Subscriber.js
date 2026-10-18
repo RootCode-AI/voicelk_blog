@@ -9,6 +9,8 @@ const subscriberSchema = new mongoose.Schema(
     unsubscribeToken: { type: String, required: true, index: true },
     confirmedAt: { type: Date },
     lastConfirmSentAt: { type: Date },
+    // When the last welcome email went out; limits it to one a day per address.
+    welcomedAt: { type: Date },
   },
   { timestamps: true },
 );
