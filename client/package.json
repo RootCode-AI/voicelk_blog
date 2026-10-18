@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node ../scripts/build-seo-assets.js",
+    "predev": "node ../scripts/build-brand-assets.js && node ../scripts/build-seo-assets.js",
     "dev": "vite",
-    "prebuild": "node ../scripts/build-seo-assets.js",
+    "prebuild": "node ../scripts/build-brand-assets.js && node ../scripts/build-seo-assets.js",
     "build": "vite build",
     "preview": "vite preview"
   },

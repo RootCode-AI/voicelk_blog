@@ -9,7 +9,7 @@ import { createSeoRouter } from '../src/routes/seo.js';
 import { pageMetadata, renderDocument, renderHead } from '../src/lib/seo.js';
 import { renderPublicContent } from '../../client/src/seo/render.js';
 import { renderLlms, renderMarkdown } from '../src/lib/llms.js';
-import { socialImage } from '../../shared/seo.js';
+import { articleSchema, socialImage, websiteSchema } from '../../shared/seo.js';
 import sharp from 'sharp';
 import { publicPages } from '../../shared/pages.js';
 import { assertPublishedImageAlt } from '../src/lib/imageAlt.js';
@@ -392,4 +392,23 @@ test('analytics integration and preference controls are removed', async () => {
   const privacy = renderPublicContent({ path: '/privacy' });
   assert.doesNotMatch(privacy, /Change analytics choice|Analytics preferences|Allow analytics/);
   assert.match(privacy, /does not include visitor analytics tracking/);
+});
+
+test('search engines are told the site is called VoiceLK, with its logo, not the domain', async () => {
+  const graph = websiteSchema('/')['@graph'];
+  const organization = graph.find((node) => node['@type'] === 'Organization');
+  const website = graph.find((node) => node['@type'] === 'WebSite');
+  assert.equal(website.name, 'VoiceLK');
+  assert.equal(organization.name, 'VoiceLK');
+  assert.equal(organization.logo.url, 'https://voicelk.dev/icon-512.png');
+  assert.equal(articleSchema(post).publisher.name, 'VoiceLK');
+  for (const node of [website, organization]) {
+    for (const name of [node.name, ...[node.alternateName].flat()]) assert.doesNotMatch(name, /\bdev\b/i);
+  }
+  const meta = renderHead(pageMetadata({ path: '/' }));
+  assert.match(meta, /og:site_name" content="VoiceLK"/);
+  assert.match(meta, /<title>VoiceLK \| Sinhala-English Text to Speech<\/title>/);
+  const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
+  assert.match(template, /<meta name="application-name" content="VoiceLK" \/>/);
+  assert.doesNotMatch(publicPages['/privacy'].intro, /voicelk\.dev/i);
 });

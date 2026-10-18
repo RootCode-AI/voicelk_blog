@@ -256,6 +256,38 @@
   }
 }
 
+/* ── Logo voice (components/Brand.jsx) ──────────────────────────────────
+   Each bar shrinks toward its centre and back, like a level meter. Timings
+   and depth come from per-bar custom properties. */
+.brand-bar {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 300ms var(--ease-out-soft);
+}
+.brand-mark[data-voice='speaking'] .brand-bar,
+.group:hover .brand-mark .brand-bar,
+.group:focus-visible .brand-mark .brand-bar {
+  animation: brand-speak var(--speak-duration) ease-in-out var(--speak-delay) infinite alternate;
+}
+/* An even count with `alternate` ends where it began: back at full height. */
+.brand-mark[data-voice='intro'] .brand-bar {
+  animation: brand-speak var(--speak-duration) ease-in-out calc(var(--speak-delay) + 0.5s) 6 alternate;
+}
+.brand-mark[data-voice='silent'] .brand-bar {
+  transform: scaleY(var(--silent-scale));
+}
+@keyframes brand-speak {
+  to {
+    transform: scaleY(var(--speak-low));
+  }
+}
+/* Overrides the global reduced-motion rule, which would leave the bars mid-squash. */
+@media (prefers-reduced-motion: reduce) {
+  .brand-bar {
+    animation: none !important;
+  }
+}
+
 /* ── Article layout ─────────────────────────────────────────────────────
    A three-track grid: blocks sit in the reading column, wide figures span
    out to 1080px, full-bleed ones to the viewport edges. */

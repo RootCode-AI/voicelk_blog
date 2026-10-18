@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Pause, Play } from 'lucide-react';
 import { mediaUrl } from '../../lib/api.js';
+import { BrandMark } from '../../components/Brand.jsx';
 
 const clock = (s) => {
   if (!Number.isFinite(s)) return '0:00';
@@ -61,7 +62,11 @@ export default function AudioPlayer({ url, title, caption, transcript, onPlay: o
         </motion.button>
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="truncate font-medium text-ink">{title || 'Audio sample'}</p>
+            <p className="flex min-w-0 items-center gap-2 font-medium text-ink">
+              {/* The logo's bars speak along with the clip. */}
+              <BrandMark book={false} voice={playing ? 'speaking' : 'idle'} className="h-3.5 w-auto shrink-0" />
+              <span className="truncate">{title || 'Audio sample'}</span>
+            </p>
             <span className="shrink-0 font-mono text-xs tabular-nums text-muted">
               {clock(time)} / {clock(duration)}
             </span>

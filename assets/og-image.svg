@@ -5,19 +5,17 @@
     <path d="M780 0V630M840 0V630M900 0V630M960 0V630M1020 0V630M1080 0V630M1140 0V630"/>
     <path d="M750 90H1200M750 150H1200M750 210H1200M750 270H1200M750 330H1200M750 390H1200M750 450H1200M750 510H1200"/>
   </g>
-  <rect x="66" y="64" width="48" height="48" rx="12" fill="#151515"/>
-  <path d="M77 87V91M83 80V98M90 75V103M97 81V97M103 86V92" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-  <text x="130" y="98" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#151515">VoiceLK</text>
+  <!-- The logo is composited at (64, 56) by scripts/build-seo-assets.js. -->
   <text x="68" y="191" font-family="Arial, Helvetica, sans-serif" font-size="16" letter-spacing="3" fill="#63645d">SINHALA + ENGLISH / TEXT TO SPEECH</text>
   <g font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#151515">
     <text x="64" y="282">One voice.</text>
     <text x="64" y="366" font-style="italic">Two languages.</text>
   </g>
   <text x="68" y="427" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#575b54">A voice for the way you speak</text>
-  <g stroke="#476953" stroke-width="12" stroke-linecap="round">
+  <g stroke="#018d76" stroke-width="12" stroke-linecap="round">
     <path d="M807 294V326M831 272V348M855 244V376M879 276V344M903 213V407M927 172V448M951 227V393M975 260V360M999 197V423M1023 242V378M1047 271V349M1071 284V336M1095 299V321"/>
   </g>
   <path d="M68 508H1132" stroke="#d7d8d0"/>
-  <text x="68" y="560" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#151515">voicelk.dev</text>
+  <text x="68" y="560" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#151515">VoiceLK · Sinhala-English text to speech</text>
   <text x="1132" y="559" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#666a60">Built from research. Made for your words.</text>
 </svg>

@@ -5,5 +5,12 @@ dist/
 *.log
 .DS_Store
 client/public/og-image.png
+# Generated from assets/brand/voicelk-logo.png by scripts/build-brand-assets.js
+client/public/brand/
+client/public/favicon-32.png
+client/public/icon-192.png
+client/public/icon-512.png
+client/public/apple-touch-icon.png
+client/public/site.webmanifest
 test-results/
 playwright-report/

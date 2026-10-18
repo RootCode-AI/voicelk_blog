@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useBlocker, useNavigate, useParams } from 'react-router';
 import { ArrowLeft, Eye, EyeOff, Loader2, PenLine, Send } from 'lucide-react';
+import { BrandLoader } from '../../components/Brand.jsx';
 import PostArticle from '../../components/PostArticle.jsx';
 import { blockMeta } from '../../blocks/registry.js';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -212,11 +213,7 @@ export default function PostEditor() {
     );
   }
   if (!form) {
-    return (
-      <div className="grid min-h-[60dvh] place-items-center">
-        <Loader2 className="size-6 animate-spin text-muted" />
-      </div>
-    );
+    return <BrandLoader label="Loading the post" />;
   }
 
   const published = form.status === 'published' && saved && JSON.parse(saved).status === 'published';

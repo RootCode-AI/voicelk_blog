@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
-import { Loader2 } from 'lucide-react';
+import { BrandLoader } from '../components/Brand.jsx';
 import { api } from '../lib/api.js';
 
 const EvaluateAuthContext = createContext(null);
@@ -42,9 +42,7 @@ export function RequireEvaluator({ children }) {
 
   if (checking) {
     return (
-      <div className="grid min-h-[100dvh] place-items-center">
-        <Loader2 className="size-6 animate-spin text-muted" />
-      </div>
+      <BrandLoader label="Checking your session" className="min-h-[100dvh]" />
     );
   }
   if (!user) return <Navigate to="/evaluate/login" replace state={{ from: location.pathname }} />;
