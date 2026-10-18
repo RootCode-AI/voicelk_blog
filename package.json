@@ -12,10 +12,12 @@
     "test:seo": "node --test server/tests/seo.test.js",
     "test:sections": "node --test server/tests/sections.test.js",
     "test:evaluation": "node --test server/tests/evaluation.test.js",
+    "test:access": "node --test server/tests/access.test.js",
     "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm start -w server",
     "create-admin": "npm run create-admin -w server --",
+    "delete-admin": "npm run delete-admin -w server --",
     "create-evaluator": "npm run create-evaluator -w server --",
     "db:setup": "npm run db:setup -w server"
   },

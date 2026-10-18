@@ -38,7 +38,7 @@ export default function EvaluateLogin() {
           Evaluator sign-in
         </motion.h1>
         <motion.p variants={fadeUp} className="mt-2 text-center text-sm text-muted">
-          Upload speech clips and read the listening-test results.
+          Evaluators and blog administrators sign in here to upload clips and read the results.
         </motion.p>
         <motion.form variants={fadeUp} onSubmit={submit} className="card mt-8 space-y-4 p-6">
           <div>
@@ -76,10 +76,11 @@ export default function EvaluateLogin() {
           </button>
         </motion.form>
         <motion.p variants={fadeUp} className="mt-6 text-center text-sm text-muted">
-          Blog administrator?{' '}
-          <Link to="/admin/login" state={{ from: '/evaluate/console' }} className="font-medium text-ink underline underline-offset-4">
-            Sign in with your admin account
-          </Link>
+          Evaluator accounts open this console only; the{' '}
+          <Link to="/admin/login" className="font-medium text-ink underline underline-offset-4">
+            blog admin
+          </Link>{' '}
+          needs an administrator account.
         </motion.p>
       </motion.div>
     </div>

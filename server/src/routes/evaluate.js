@@ -16,6 +16,8 @@ import {
   parseUploadRequest,
   summarize,
 } from '../lib/evaluation.js';
+import { startSession } from '../middleware/auth.js';
+import { Admin } from '../models/Admin.js';
 import {
   endEvaluatorSession,
   publicEvaluateUser,
@@ -117,12 +119,26 @@ router.post('/auth/login', loginLimiter, async (req, res) => {
   const password = String(req.body?.password ?? '');
   if (!email || !password) throw badRequest('Enter your email and password.');
 
-  const evaluator = must(
-    await supabase().from('evaluators').select('id, email, name, password_hash').eq('email', email).maybeSingle(),
-  );
-  const ok = await bcrypt.compare(password, evaluator?.password_hash ?? DUMMY_HASH);
-  if (!evaluator || !ok) throw new HttpError(401, 'That email and password do not match.');
+  // Blog administrators can sign in here too. Both passwords are always checked, so
+  // the response time never hints at which kind of account an email belongs to.
+  const [evaluator, admin] = await Promise.all([
+    supabase().from('evaluators').select('id, email, name, password_hash').eq('email', email).maybeSingle().then(must),
+    Admin.findOne({ email }).select('+passwordHash'),
+  ]);
+  const [evaluatorOk, adminOk] = await Promise.all([
+    bcrypt.compare(password, evaluator?.password_hash ?? DUMMY_HASH),
+    bcrypt.compare(password, admin?.passwordHash ?? DUMMY_HASH),
+  ]);
 
+  // An administrator gets their ordinary admin session, which opens both panels.
+  if (admin && adminOk) {
+    endEvaluatorSession(res);
+    startSession(res, admin);
+    return res.json({ user: publicEvaluateUser({ id: String(admin._id), role: 'admin', email: admin.email, name: admin.name ?? '' }) });
+  }
+  if (!evaluator || !evaluatorOk) throw new HttpError(401, 'That email and password do not match.');
+
+  // An evaluator's session is for this console only; /admin refuses it.
   startEvaluatorSession(res, evaluator);
   res.json({ user: publicEvaluateUser({ ...evaluator, role: 'evaluator' }) });
 });
