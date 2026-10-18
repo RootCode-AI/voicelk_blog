@@ -168,7 +168,8 @@ answers 503.
   `client/src/index.css`.
 - **Logo:** every brand image comes from `assets/brand/voicelk-logo.png`. Before each
   `dev` and `build`, `scripts/build-brand-assets.js` turns it into these generated, untracked files:
-  - the book and wordmark images
+  - the book and wordmark images, drawn in the site's ink black (the same black as its
+    text and buttons; change `INK` in the script and in `Brand.jsx` together)
   - the favicon, Apple and app icons, and `site.webmanifest`
   - the logo used on the social share card
 

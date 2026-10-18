@@ -3,16 +3,20 @@
 // The book and the wordmark are images cut from assets/brand/voicelk-logo.png by
 // scripts/build-brand-assets.js; the five bars are drawn here instead, at the same
 // coordinates (source pixels, measured from the mark's top-left corner), so CSS can
-// animate them. At rest the result is identical to the original logo.
+// animate them. At rest it has the original logo's exact shapes, drawn in the site's
+// ink black; the full-colour logo is kept for email, the social card and the icons.
 
 const MARK = { width: 644, height: 381 };
+// The site's ink (--color-ink in index.css); the book and wordmark images are
+// generated in the same colour by scripts/build-brand-assets.js.
+const INK = '#1a1a1a';
 const WORDMARK = { x: 673, y: 87, width: 1257, height: 254 };
 const BARS = [
-  { x: 218, y: 84, width: 26, height: 47, fill: '#0165a6' },
-  { x: 260, y: 44, width: 36, height: 126, fill: '#027f84' },
-  { x: 312, y: 0, width: 39, height: 217, fill: '#018d76' },
-  { x: 366, y: 45, width: 30, height: 123, fill: '#018f74' },
-  { x: 410, y: 84, width: 25, height: 47, fill: '#018f74' },
+  { x: 218, y: 84, width: 26, height: 47 },
+  { x: 260, y: 44, width: 36, height: 126 },
+  { x: 312, y: 0, width: 39, height: 217 },
+  { x: 366, y: 45, width: 30, height: 123 },
+  { x: 410, y: 84, width: 25, height: 47 },
 ];
 // Uneven timings make the bars read as speech rather than a metronome.
 const SPEECH = [
@@ -55,7 +59,7 @@ export function BrandMark({ voice = 'idle', wordmark = false, book = true, class
           width={bar.width}
           height={bar.height}
           rx={bar.width / 2}
-          fill={bar.fill}
+          fill={INK}
           style={{
             '--speak-low': SPEECH[i].low,
             '--speak-duration': SPEECH[i].duration,
