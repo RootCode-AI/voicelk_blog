@@ -12,6 +12,24 @@ function optional(name) {
   return /^(replace-with|sb_secret_replace)/.test(value) ? '' : value;
 }
 
+// SUPABASE_URL must be the project's https address. Anything else (such as the
+// postgresql:// connection string, which carries the database password) is refused,
+// because this value is published in every page's Content-Security-Policy header.
+function supabaseOrigin() {
+  const value = process.env.SUPABASE_URL?.trim() ?? '';
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    // Plain http only for this machine, e.g. a local Supabase started with its CLI.
+    const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    if ((url.protocol === 'https:' || (local && url.protocol === 'http:')) && !url.username && !url.password) return url.origin;
+  } catch {
+    // Reported below.
+  }
+  console.error('[config] SUPABASE_URL must be the https project URL (https://<project-ref>.supabase.co), not a connection string. The listening evaluation stays off until it is fixed.');
+  return '';
+}
+
 const clientOrigin = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
 
 export const config = {
@@ -30,7 +48,7 @@ export const config = {
   // The listening evaluation lives in Supabase; the rest of the blog stays on MongoDB.
   // Left unset, the blog runs as before and the evaluation API answers 503.
   supabase: {
-    url: (process.env.SUPABASE_URL ?? '').replace(/\/$/, ''),
+    url: supabaseOrigin(),
     // The secret key (sb_secret_…); the legacy service_role JWT still works as a fallback.
     secretKey: optional('SUPABASE_SECRET_KEY') || optional('SUPABASE_SERVICE_ROLE_KEY'),
     audioBucket: process.env.EVALUATION_AUDIO_BUCKET ?? 'evaluation-audio',

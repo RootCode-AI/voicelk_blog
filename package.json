@@ -14,6 +14,7 @@
     "test:evaluation": "node --test server/tests/evaluation.test.js",
     "test:access": "node --test server/tests/access.test.js",
     "test:emails": "node --test server/tests/emails.test.js",
+    "test:config": "node --test server/tests/config.test.js",
     "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm start -w server",
