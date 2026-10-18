@@ -133,6 +133,17 @@ answers 503.
   an animated waveform.
 - Design tokens (colours, shadows, fonts) are in the `@theme` block of
   `client/src/index.css`.
+- **Logo:** every brand image comes from `assets/brand/voicelk-logo.png`. Before each
+  `dev` and `build`, `scripts/build-brand-assets.js` turns it into these generated, untracked files:
+  - the book and wordmark images
+  - the favicon, Apple and app icons, and `site.webmanifest`
+  - the logo used on the social share card
+
+  `client/src/components/Brand.jsx` redraws the five sound bars as SVG. They speak when
+  the logo first appears and on hover, and keep moving while a page loads or a clip
+  plays. They go silent on the 404 page and stay still for visitors who prefer
+  reduced motion. To change the logo, replace the PNG. If its layout changes,
+  re-measure the regions at the top of the script and in `Brand.jsx`.
 
 ## Smooth scrolling
 

@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router';
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react';
 import { Menu, X } from 'lucide-react';
 import { site } from '../site.config.js';
+import { BrandMark } from './Brand.jsx';
 
 const links = [
   { to: '/journey', label: 'Journey' },
@@ -10,19 +11,11 @@ const links = [
   { to: '/about', label: 'About' },
 ];
 
+// The bars say a few syllables when the logo first appears, and again on hover.
 export function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label={`${site.title} home`}>
-      <span className="grid size-8 place-items-center rounded-lg bg-ink">
-        <svg viewBox="0 0 20 20" className="size-4" aria-hidden="true">
-          {[[2, 8, 4], [6, 5, 10], [10, 2, 16], [14, 6, 8]].map(([x, y, h]) => (
-            <rect key={x} x={x} y={y} width="2.2" height={h} rx="1.1" fill="#fcfcfc" />
-          ))}
-        </svg>
-      </span>
-      <span className="text-[15px] font-semibold tracking-tight">
-        {site.name}
-      </span>
+    <Link to="/" className="group flex items-center" aria-label={`${site.title} home`}>
+      <BrandMark wordmark voice="intro" className="h-8 w-auto" />
     </Link>
   );
 }

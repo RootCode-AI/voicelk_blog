@@ -115,7 +115,10 @@ app.use('/api/evaluate', evaluateRoutes);
 const clientDist = fileURLToPath(new URL('../../client/dist/', import.meta.url));
 if (!process.env.VERCEL && fs.existsSync(clientDist)) {
   app.use('/assets', express.static(`${clientDist}/assets`, { immutable: true, maxAge: '1y' }));
-  app.get('/favicon.svg', (_req, res) => res.sendFile(`${clientDist}/favicon.svg`));
+  app.use('/brand', express.static(`${clientDist}/brand`, { maxAge: '1d' }));
+  for (const file of ['favicon-32.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'site.webmanifest']) {
+    app.get(`/${file}`, (_req, res) => res.sendFile(`${clientDist}/${file}`, { maxAge: '1d' }));
+  }
   app.get('/og-image.png', (_req, res) => res.sendFile(`${clientDist}/og-image.png`, { maxAge: '1h' }));
 }
 app.get('/index.html', (_req, res) => res.redirect(308, '/'));

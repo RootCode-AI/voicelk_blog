@@ -3,7 +3,7 @@ export const publicPages = {
   '/privacy': {
     title: 'Privacy Policy',
     description: 'How the VoiceLK website handles newsletter subscriptions, contact messages, operational data and your privacy requests.',
-    intro: 'This notice describes the data handled by VoiceLK at voicelk.dev, operated by the VoiceLK Team.',
+    intro: 'This notice describes the data handled by the VoiceLK website, operated by the VoiceLK Team.',
     updated: '18 October 2026',
     sections: [
       { title: 'Information you provide', body: 'When you subscribe, we store your email address, subscription status, subscription timestamps and unsubscribe token. When you contact us, we store your name, email address, message and timestamps so the team can respond. Do not send passwords, payment details or sensitive personal information through these forms.' },

@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router';
-import { Loader2 } from 'lucide-react';
+import { BrandLoader } from '../components/Brand.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function RequireAdmin({ children }) {
@@ -8,9 +8,7 @@ export default function RequireAdmin({ children }) {
 
   if (checking) {
     return (
-      <div className="grid min-h-[100dvh] place-items-center">
-        <Loader2 className="size-6 animate-spin text-muted" />
-      </div>
+      <BrandLoader label="Checking your session" className="min-h-[100dvh]" />
     );
   }
   if (!admin) return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;

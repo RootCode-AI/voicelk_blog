@@ -1,10 +1,10 @@
 import { Suspense, lazy } from 'react';
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router';
 import InfoPage from './pages/InfoPage.jsx';
-import { Loader2 } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import Seo from './components/Seo.jsx';
+import { BrandLoader } from './components/Brand.jsx';
 import About from './pages/About.jsx';
 import Blog from './pages/Blog.jsx';
 import Home from './pages/Home.jsx';
@@ -30,11 +30,7 @@ const ClipResults = lazy(() => import('./evaluate/ClipResults.jsx'));
 const Evaluators = lazy(() => import('./evaluate/Evaluators.jsx'));
 
 function Loading() {
-  return (
-    <div className="grid min-h-[60dvh] place-items-center">
-      <Loader2 className="size-6 animate-spin text-muted" />
-    </div>
-  );
+  return <BrandLoader />;
 }
 
 function Root() {
