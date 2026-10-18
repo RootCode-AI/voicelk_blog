@@ -18,6 +18,7 @@ export default function Footer() {
             <li><Link to="/journey" className="text-slate hover:text-ink">Journey</Link></li>
             <li><Link to="/research" className="text-slate hover:text-ink">Research &amp; results</Link></li>
             <li><Link to="/#project" className="text-slate hover:text-ink">The pipeline</Link></li>
+            <li><Link to="/evaluate" className="text-slate hover:text-ink">Rate our speech samples</Link></li>
             <li><Link to="/about" className="text-slate hover:text-ink">About &amp; contact</Link></li>
             <li><Link to="/faq" className="text-slate hover:text-ink">Frequently asked questions</Link></li>
             <li><Link to="/privacy" className="text-slate hover:text-ink">Privacy Policy</Link></li>

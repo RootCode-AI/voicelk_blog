@@ -42,6 +42,31 @@ export function uploadFile(file) {
   return api.post('/media', form);
 }
 
+// Sends a file straight to a Supabase Storage signed upload URL — used for clips
+// too large to pass through the API — reporting progress as a 0–1 fraction.
+export function uploadToSignedUrl(signedUrl, file, { contentType, onProgress } = {}) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', signedUrl);
+    xhr.setRequestHeader('Content-Type', contentType || file.type || 'application/octet-stream');
+    xhr.setRequestHeader('x-upsert', 'false');
+    xhr.upload.onprogress = (event) => event.lengthComputable && onProgress?.(event.loaded / event.total);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve();
+      if (xhr.status === 413) return reject(new ApiError('Audio files can be at most 10 MB.', 413));
+      let message = `Upload failed (${xhr.status})`;
+      try {
+        message = JSON.parse(xhr.responseText).message || message;
+      } catch {
+        // Keep the status-based message.
+      }
+      reject(new ApiError(message, xhr.status));
+    };
+    xhr.onerror = () => reject(new ApiError('The upload was interrupted. Check your connection and try again.', 0));
+    xhr.send(file);
+  });
+}
+
 // Media uploaded to the blog is stored as a site-relative /api/media/<id> path.
 export function mediaUrl(url) {
   if (!url) return '';

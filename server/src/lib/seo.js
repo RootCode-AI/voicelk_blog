@@ -1,4 +1,4 @@
-import { seoSite, seoPages, absoluteUrl, articleSchema, socialImage, websiteSchema } from '../../../shared/seo.js';
+import { seoSite, seoPages, unlistedPages, isEvaluateConsolePath, absoluteUrl, articleSchema, socialImage, websiteSchema } from '../../../shared/seo.js';
 import { isPostListing } from '../../../shared/postSections.js';
 
 export const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g,
@@ -6,14 +6,14 @@ export const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g,
 export const safeJson = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 
 export function pageMetadata({ path, post, status = 200, page = 1, filtered = false, preview = false, origin = seoSite.url }) {
-  const privatePage = path.startsWith('/admin') || path.startsWith('/newsletter/');
+  const privatePage = path.startsWith('/admin') || path.startsWith('/newsletter/') || isEvaluateConsolePath(path);
   const canonicalPath = isPostListing(path) && page > 1 && !filtered ? `${path}?page=${page}` : path;
   const canonical = absoluteUrl(canonicalPath, origin);
-  const defaults = seoPages[path];
+  const defaults = seoPages[path] ?? unlistedPages[path];
   const title = status === 404 ? `Page not found | ${seoSite.name}` : post ? `${post.title} | ${seoSite.name}` :
     privatePage ? `Private page | ${seoSite.name}` : page > 1 ? `${defaults?.title.split(' | ')[0] || 'Product updates'} — Page ${page} | ${seoSite.name}` : defaults?.title || seoSite.title;
   const description = status === 404 ? 'This VoiceLK page is unavailable. Explore the product journey, visit the homepage or find answers in the FAQ.' : post?.excerpt || defaults?.description || seoSite.description;
-  const noIndex = preview || privatePage || filtered || status !== 200;
+  const noIndex = preview || privatePage || Boolean(unlistedPages[path]) || filtered || status !== 200;
   const schema = post ? articleSchema(post, origin) : websiteSchema(canonicalPath, title, origin);
   const social = socialImage(post?.coverImage?.url, post?.coverImage?.alt || post?.title, origin);
   const markdown = !noIndex && (post || seoPages[path]) ?

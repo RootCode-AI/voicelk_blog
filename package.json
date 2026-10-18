@@ -2,7 +2,7 @@
   "name": "voicelk-blog",
   "private": true,
   "type": "module",
-  "description": "VoiceLK product website: React client and Express/MongoDB API",
+  "description": "VoiceLK product website: React client and Express API on MongoDB, with the listening evaluation on Supabase",
   "workspaces": [
     "server",
     "client"
@@ -11,10 +11,13 @@
     "test:ui": "playwright test",
     "test:seo": "node --test server/tests/seo.test.js",
     "test:sections": "node --test server/tests/sections.test.js",
+    "test:evaluation": "node --test server/tests/evaluation.test.js",
     "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm start -w server",
-    "create-admin": "npm run create-admin -w server --"
+    "create-admin": "npm run create-admin -w server --",
+    "create-evaluator": "npm run create-evaluator -w server --",
+    "db:setup": "npm run db:setup -w server"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",

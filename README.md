@@ -2,7 +2,8 @@
 
 VoiceLK is a Sinhala-English text-to-speech product built from research.
 This repository contains its product website, with Journey updates, supporting
-Research results, and an admin editor powered by React and Express/MongoDB.
+Research results, an admin editor powered by React and Express/MongoDB, and a
+listening evaluation on Supabase.
 The model-training pipeline lives separately in `voicelk_ml`.
 
 ## Community and project information
@@ -84,6 +85,44 @@ When `RESEND_API_KEY` is empty, emails are printed to the API console instead of
 development needs no account. To send real email, verify a domain in Resend and set
 `MAIL_FROM` to an address on it. `onboarding@resend.dev` only delivers to your own Resend
 login address.
+
+## Listening evaluation (`/evaluate`)
+
+A public listening test for real users, plus a separate console for the team. It runs on
+**Supabase**; the rest of the site stays on MongoDB.
+
+- **`/evaluate`**: anyone can play each clip, read the text it came from, and rate it:
+  overall quality, clarity and naturalness (1–5 each), pass or fail, and optional written
+  feedback. Each IP address can send one response per clip. Only a keyed one-way hash of
+  the address is stored (`FEEDBACK_IP_SECRET`), never the address itself. The page is
+  public but kept out of search results and the sitemap.
+- **`/evaluate/console`**: evaluators sign in at `/evaluate/login` to upload an audio file
+  (≤ 10 MB) with its `.txt` text file, and to read the results for each clip: mean opinion
+  scores with 95% confidence intervals, the rating spread, the pass rate and listener
+  comments. Responses can be exported as CSV. Blog administrators are recognised
+  automatically and are the only ones who can add or remove evaluators. An evaluator
+  cannot open `/admin`.
+
+Setup:
+
+1. Apply [`server/supabase/evaluation.sql`](server/supabase/evaluation.sql): paste it into
+   the Supabase SQL editor, or run `npm run db:setup` with `SUPABASE_DB_URL` (Dashboard →
+   Connect → Session pooler) in `server/.env`.
+   It creates the tables (row level security on, no public policies) and the
+   `evaluation-audio` storage bucket, capped at 10 MB and audio types.
+2. Set `SUPABASE_URL`, `SUPABASE_SECRET_KEY` (the `sb_secret_…` key from Project
+   Settings → API Keys) and `FEEDBACK_IP_SECRET` in `server/.env` and in Vercel. The
+   secret key is server-only. The publishable key and the JWKS URL aren't used: the
+   browser never talks to Supabase directly, and the blog doesn't use Supabase Auth.
+3. Add evaluators from the console, or with
+   `npm run create-evaluator -- rater@example.com "a long password" "Their Name"`.
+
+Audio never passes through the API, because Vercel functions accept at most 4.5 MB. The
+API checks the uploader's role, size and type and returns a signed upload URL, and the
+browser uploads straight to Supabase Storage. Before saving the clip, the API checks the
+stored object again.
+Without the Supabase variables, the rest of the site runs normally and `/api/evaluate`
+answers 503.
 
 ## Customising
 

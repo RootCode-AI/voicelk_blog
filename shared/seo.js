@@ -41,6 +41,18 @@ export const seoPages = {
   },
 };
 
+// Public but deliberately kept out of search results and the sitemap: the listening
+// test is a research instrument, not content.
+export const unlistedPages = {
+  '/evaluate': {
+    title: `Rate VoiceLK speech | ${seoSite.name}`,
+    description: 'Listen to VoiceLK Sinhala-English speech samples and rate their quality, clarity and naturalness.',
+  },
+};
+
+// The evaluation sign-in and console behind /evaluate are private, like /admin.
+export const isEvaluateConsolePath = (path) => /^\/evaluate\/./.test(path);
+
 export function absoluteUrl(value, base = seoSite.url) {
   try {
     const url = new URL(value, base);

@@ -17,8 +17,10 @@ import adminPostRoutes from './routes/adminPosts.js';
 import mediaRoutes from './routes/media.js';
 import subscriberRoutes from './routes/subscribers.js';
 import contactRoutes from './routes/contact.js';
+import evaluateRoutes from './routes/evaluate.js';
 import { createSeoRouter } from './routes/seo.js';
 import { sectionFilter } from './lib/postSections.js';
+import { supabaseEnabled } from './supabase.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -53,7 +55,8 @@ app.use(
         imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
         mediaSrc: ["'self'", 'blob:', 'https:'],
         frameSrc: ['https://www.youtube-nocookie.com', 'https://player.vimeo.com'],
-        connectSrc: ["'self'"],
+        // Evaluation clips upload from the browser straight to Supabase Storage.
+        connectSrc: ["'self'", ...(config.supabase.url ? [config.supabase.url] : [])],
       },
     },
   }),
@@ -79,7 +82,8 @@ app.use('/api', async (_req, _res, next) => {
   }
 });
 
-app.get('/api/health', (_req, res) => res.json({ ok: true, mail: mailEnabled ? 'resend' : 'console' }));
+app.get('/api/health', (_req, res) =>
+  res.json({ ok: true, mail: mailEnabled ? 'resend' : 'console', evaluation: supabaseEnabled ? 'supabase' : 'off' }));
 
 app.get('/api/stats', async (_req, res) => {
   const [posts, subscribers, latest] = await Promise.all([
@@ -106,6 +110,7 @@ app.use('/api/admin/posts', requireAdmin, adminPostRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/evaluate', evaluateRoutes);
 // Preserve static asset delivery on standalone hosts. Vercel serves these via CDN.
 const clientDist = fileURLToPath(new URL('../../client/dist/', import.meta.url));
 if (!process.env.VERCEL && fs.existsSync(clientDist)) {
