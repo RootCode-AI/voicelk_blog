@@ -499,7 +499,7 @@ html.js #root:has(> .seo-document)::before {
   margin: auto;
   width: 180px;
   height: 36px;
-  background: url('/brand/voicelk-logo.png') center / contain no-repeat;
+  background: url('/brand/voicelk-logo-ink.png') center / contain no-repeat;
   opacity: 0;
   animation:
     seo-splash-in 0.4s var(--ease-out-soft) 0.3s forwards,

@@ -79,8 +79,25 @@ const raw = (buffer) => sharp(buffer, { raw: { width: info.width, height: info.h
 await mkdir(pub('brand'), { recursive: true });
 const webp = { quality: 92, alphaQuality: 100, effort: 6 };
 
-await raw(bookless).extract(MARK).resize({ height: 256 }).webp(webp).toFile(pub('brand/voicelk-book.webp'));
-await sharp(source).extract(WORDMARK).resize({ height: 96 }).webp(webp).toFile(pub('brand/voicelk-wordmark.webp'));
+// On the website the logo is drawn in the site's ink (--color-ink), matching its black
+// text and buttons. Every pixel takes the ink colour and keeps its own transparency, so
+// shapes, gaps and soft edges stay exactly as drawn. Email, the social card and the
+// icons below keep the full-colour logo.
+const INK = { r: 0x1a, g: 0x1a, b: 0x1a };
+async function inked(image) {
+  const { data: pixels, info: size } = await image.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = INK.r;
+    pixels[i + 1] = INK.g;
+    pixels[i + 2] = INK.b;
+  }
+  return sharp(pixels, { raw: { width: size.width, height: size.height, channels: 4 } });
+}
+
+await (await inked(raw(bookless).extract(MARK).resize({ height: 256 }))).webp(webp).toFile(pub('brand/voicelk-book.webp'));
+await (await inked(sharp(source).extract(WORDMARK).resize({ height: 96 }))).webp(webp).toFile(pub('brand/voicelk-wordmark.webp'));
+// The whole logo in ink, for the moment before the app has loaded (index.css).
+await (await inked(sharp(source).extract(LOGO).resize({ width: 480 }))).png({ compressionLevel: 9 }).toFile(pub('brand/voicelk-logo-ink.png'));
 // Whole logo for places that cannot draw SVG bars: email, the social card, documents.
 await sharp(source).extract(LOGO).resize({ width: 960 }).png({ compressionLevel: 9 }).toFile(pub('brand/voicelk-logo.png'));
 
