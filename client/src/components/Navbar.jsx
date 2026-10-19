@@ -9,7 +9,11 @@ const links = [
   { to: '/journey', label: 'Journey' },
   { to: '/#project', label: 'Product' },
   { to: '/about', label: 'About' },
+  { to: '/research', label: 'Read the research' },
 ];
+
+const chat = { href: 'https://chat.voicelk.dev', label: 'Chat' };
+const external = { target: '_blank', rel: 'noopener noreferrer' };
 
 // The bars say a few syllables when the logo first appears, and again on hover.
 export function Logo() {
@@ -76,9 +80,9 @@ export default function Navbar() {
             </li>
           ))}
           <li className="ml-2">
-            <Link to="/research" className="btn-dark px-4! py-2! text-sm">
-              Read the research
-            </Link>
+            <a href={chat.href} {...external} className="btn-dark px-4! py-2! text-sm">
+              {chat.label}
+            </a>
           </li>
         </ul>
         <button ref={menuButton} type="button" className="btn-icon size-11! md:hidden" onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="mobile-navigation">
@@ -97,11 +101,17 @@ export default function Navbar() {
             transition={{ duration: 0.2 }}
             className="max-h-[calc(100svh-4rem)] overflow-y-auto overscroll-contain border-t border-line bg-paper px-4 pb-6 pt-2 sm:px-6 md:hidden"
           >
-            {[...links, { to: '/research', label: 'Read the research' }].map((l) => (
+            {[...links, chat].map((l) => (
               <li key={l.label}>
-                <Link to={l.to} onClick={() => setOpen(false)} className="block py-3 font-serif text-2xl">
-                  {l.label}
-                </Link>
+                {l.href ? (
+                  <a href={l.href} {...external} onClick={() => setOpen(false)} className="block py-3 font-serif text-2xl">
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link to={l.to} onClick={() => setOpen(false)} className="block py-3 font-serif text-2xl">
+                    {l.label}
+                  </Link>
+                )}
               </li>
             ))}
           </motion.ul>
