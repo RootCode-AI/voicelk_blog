@@ -70,7 +70,8 @@ export default function Blog({ section = '' }) {
         description={collection?.description || 'Experiments, design decisions and results from building a Sinhala-English code-switched text-to-speech system.'}
         path={requestedPage > 1 && !tag && !q ? `${path}?page=${requestedPage}` : path}
         noIndex={Boolean(tag || q)}
-      />      <motion.header initial="hidden" animate="show" variants={stagger()} className="max-w-3xl">
+      />
+      <motion.header initial="hidden" animate="show" variants={stagger()} className="max-w-3xl">
         <motion.p variants={fadeUp} className="eyebrow mb-4">
           {collection?.label || 'All notes'}
         </motion.p>
@@ -82,8 +83,8 @@ export default function Blog({ section = '' }) {
         </motion.p>
       </motion.header>
 
-      <div className="mt-12 flex flex-col gap-5 border-b border-line pb-8 md:flex-row md:items-center md:justify-between">
-        <div className="relative w-full md:max-w-sm">
+      <div className="mt-12 flex flex-col gap-5 border-b border-line pb-8">
+        <div className="relative w-full md:max-w-md">
           <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
           <input
             type="search"
