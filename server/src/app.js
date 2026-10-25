@@ -142,6 +142,8 @@ if (fs.existsSync(clientDist)) {
     app.get(`/${file}`, (_req, res) => res.sendFile(`${clientDist}/${file}`, { maxAge: '1d' }));
   }
   app.get('/og-image.png', (_req, res) => res.sendFile(`${clientDist}/og-image.png`, { maxAge: '1h' }));
+  // Bing must fetch the original verification XML without login or database access.
+  app.get('/BingSiteAuth.xml', (_req, res) => res.sendFile(`${clientDist}/BingSiteAuth.xml`, { maxAge: 0 }));
 }
 app.get('/index.html', (_req, res) => res.redirect(308, '/'));
 app.use(createSeoRouter({

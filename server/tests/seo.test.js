@@ -325,6 +325,11 @@ test('the production server renders pages, serves the built assets and compresse
     assert.match(html, /src="\/assets\/index-[^"]+\.js"/);
     assert.match(await (await fetch(url('robots.txt'))).text(), /Sitemap: https:\/\/voicelk.dev\/sitemap.xml/);
     assert.equal((await fetch(url('nonexistent-page'))).status, 404);
+    const bingVerification = await fetch(url('BingSiteAuth.xml'));
+    assert.equal(bingVerification.status, 200);
+    assert.match(bingVerification.headers.get('content-type'), /(?:application|text)\/xml/);
+    assert.deepEqual(Buffer.from(await bingVerification.arrayBuffer()),
+      await readFile(new URL('../../client/public/BingSiteAuth.xml', import.meta.url)));
     assert.match(await (await fetch(url('about.md'))).text(), /# About VoiceLK/);
 
     // The server delivers the built client itself, compressed and long-cached.
