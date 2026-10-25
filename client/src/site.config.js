@@ -5,12 +5,13 @@
 import { seoSite } from '../../shared/seo.js';
 
 export const site = {
-  name: 'VoiceLK',
-  title: 'VoiceLK',
+  name: seoSite.name,
+  title: seoSite.name,
   url: seoSite.url,
   seoTitle: seoSite.title,
-  description:
-    'VoiceLK is a Sinhala-English text-to-speech product built from research, bringing mixed-language text to life as speech.',
+  description: seoSite.description,
+  heroHeadline: 'VoiceLK brings words to life',
+  heroSubheading: 'Sinhala & English.',
   tagline:
     'VoiceLK turns Sinhala–English text into speech. A product built from research, designed for the way you speak.',
   university: 'Rajarata University of Sri Lanka',

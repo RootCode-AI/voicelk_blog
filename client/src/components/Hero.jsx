@@ -62,13 +62,13 @@ export default function Hero() {
             variants={fadeUp}
             className="hero-title block font-medium leading-[1.05] tracking-[-0.045em] text-ink"
           >
-            Bring your words to life
+            {site.heroHeadline}
           </motion.span>
           <motion.span
             variants={fadeUp}
             className="hero-subtitle mt-2 block font-serif italic leading-[1.02] tracking-[-0.02em] text-slate"
           >
-            Sinhala &amp; English.
+            {site.heroSubheading}
           </motion.span>
         </h1>
 
