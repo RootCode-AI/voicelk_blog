@@ -358,3 +358,31 @@ and landscape layouts, first-screen desktop actions, and mobile navigation.
 Screenshots and failure traces are written to the ignored `test-results/` folder.
 To use an installed Edge or Chrome browser instead, set `UI_BROWSER_CHANNEL` to
 `msedge` or `chrome` before running the tests.
+
+### Appearing for searches for VoiceLK
+
+The brand and structured-data site name are **VoiceLK**; `voicelk.dev` is its
+canonical address. The homepage title includes the brand and Sinhala-English text
+to speech, and its visible heading includes VoiceLK. The initial server HTML and
+React page use the same homepage wording. Keep the domain in canonical URLs and
+the sitemap; do not replace it with the brand name.
+
+After deploying these changes:
+
+1. In Google Search Console, inspect `https://voicelk.dev/`. Check whether it is
+   indexed, the last crawl date, and whether Google's selected canonical matches
+   that address. Run **Test live URL**, then **Request indexing**.
+2. Submit `https://voicelk.dev/sitemap.xml` in **Sitemaps** and check that it is
+   successfully read. Use **Page indexing** to investigate excluded URLs.
+3. In **Performance**, filter queries for `VoiceLK` to track impressions and clicks.
+   A manual search alone cannot establish whether a page is indexed.
+4. Use the same VoiceLK name and homepage link on genuine project profiles and
+   university/project pages you control. Avoid creating duplicate sites or keyword
+   stuffing to target the name.
+
+Search Console requires access to the verified property. A code change or crawl
+request cannot guarantee placement for a query. Google may take days to weeks to
+recrawl, and decides the displayed name and ranking.
+
+References: [Google site names](https://developers.google.com/search/docs/appearance/site-names)
+and [requesting a recrawl](https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl).

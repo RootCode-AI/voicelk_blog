@@ -71,7 +71,7 @@ export function renderPublicContent({ path, post, posts = [], page = 1, hasMore 
       ...site.team.map((member) => h('p', { key: member.name }, `${member.name} — ${member.role}`)));
   } else if (path === '/' || isPostListing(path)) {
     const collection = postSections[sectionFromPath(path)];
-    body = h('section', null, h('h1', null, path === '/' ? 'Bring your words to life in Sinhala & English' : collection?.title || 'Product updates'),
+    body = h('section', null, h('h1', null, path === '/' ? `${site.heroHeadline} ${site.heroSubheading}` : collection?.title || 'Product updates'),
       h('p', null, collection?.description || site.description), postLinks(posts),
       page > 1 && h('a', { href: page === 2 ? path : `${path}?page=${page - 1}` }, 'Previous notes'),
       hasMore && h('a', { href: `${path}?page=${page + 1}` }, 'More updates'),

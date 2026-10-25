@@ -68,7 +68,10 @@ test('public copy presents VoiceLK as a product with research origins', async ()
     }
     const home = await (await fetch(base + '/')).text();
     assert.match(home, /text-to-speech product built from research/);
-    assert.match(home, /<title>VoiceLK<\/title>/);
+    assert.match(home, /<h1>VoiceLK brings words to life Sinhala &amp; English\.<\/h1>/);
+    assert.match(home, /rel="canonical" href="https:\/\/voicelk.dev\/"/);
+    assert.match(home, /name="robots" content="index, follow, max-image-preview:large"/);
+    assert.match(home, /<title>VoiceLK \| Sinhala-English Text to Speech<\/title>/);
     const faq = await (await fetch(base + '/faq')).text();
     assert.match(faq, /It grew out of research/);
     assert.match(faq, /does not currently include a public speech-generation interface/);
@@ -424,9 +427,11 @@ test('search engines are told the site is called VoiceLK, with its logo, not the
   }
   const meta = renderHead(pageMetadata({ path: '/' }));
   assert.match(meta, /og:site_name" content="VoiceLK"/);
-  assert.match(meta, /<title>VoiceLK<\/title>/);
+  assert.match(meta, /<title>VoiceLK \| Sinhala-English Text to Speech<\/title>/);
   const template = await readFile(new URL('../../client/index.html', import.meta.url), 'utf8');
   assert.match(template, /<meta name="application-name" content="VoiceLK" \/>/);
+  assert.match(template, /<title>VoiceLK \| Sinhala-English Text to Speech<\/title>/);
+  assert.equal((meta.match(/"@type":"WebSite"/g) || []).length, 1);
   assert.doesNotMatch(publicPages['/privacy'].intro, /voicelk\.dev/i);
 });
 
