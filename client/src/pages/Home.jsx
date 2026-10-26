@@ -1,3 +1,4 @@
+import { useOpenCode } from '../context/OpenCodeContext.jsx';
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
 import { motion } from 'motion/react';
@@ -87,6 +88,8 @@ function Pipeline() {
 }
 
 function Repositories() {
+  const { repos, loading } = useOpenCode();
+  if (loading || !repos.length) return null;
   return (
     <section className="mx-auto max-w-6xl px-4 py-[clamp(4rem,8vw,8rem)] sm:px-6">
       <SectionHeading
@@ -98,11 +101,11 @@ function Repositories() {
         }
       />
       <RevealGroup className="grid gap-4 sm:grid-cols-2">
-        {site.repos.map((repo) => {
+        {repos.map((repo) => {
           const Wrapper = repo.url ? motion.a : motion.div;
           return (
             <Wrapper
-              key={repo.name}
+              key={repo.id}
               variants={fadeUp}
               whileHover={repo.url ? { y: -3 } : undefined}
               {...(repo.url && { href: repo.url, target: '_blank', rel: 'noreferrer' })}

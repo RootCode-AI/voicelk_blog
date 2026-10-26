@@ -1,3 +1,4 @@
+import { DEFAULT_OPEN_CODE, publicOpenCode } from '../../../shared/openCode.js';
 import { Router } from 'express';
 import { readFile } from 'node:fs/promises';
 import { renderPublicContent } from '../../../client/src/seo/render.js';
@@ -15,6 +16,7 @@ async function loadTemplate() {
 
 // Dependencies are injected so crawl behavior can be tested without a live database.
 export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate = loadTemplate,
+  getOpenCode = async () => publicOpenCode(DEFAULT_OPEN_CODE),
   origin = seoSite.url, preview = process.env.SITE_PREVIEW === 'true' }) {
   const router = Router();
   router.get('/robots.txt', (_req, res) => {
@@ -24,7 +26,7 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
     try {
       const { posts } = await listPosts({ page: 1, size: 30, q: '', tag: '' });
       if (preview) res.set('X-Robots-Tag', 'noindex');
-      res.type('text/plain').set('Cache-Control', 'private, no-store').send(renderLlms(posts, origin));
+      res.type('text/plain').set('Cache-Control', 'private, no-store').send(renderLlms(posts, origin, await getOpenCode()));
     } catch {
       res.status(503).set({ 'Cache-Control': 'no-store', 'Retry-After': '60' }).type('text/plain').send('VoiceLK guide temporarily unavailable.');
     }
@@ -43,7 +45,7 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
       }
       const canonical = `${origin}${path}${isPostListing(path) && page > 1 ? `?page=${page}` : ''}`;
       res.set('Link', `<${canonical}>; rel="canonical", <${origin}/llms.txt>; rel="describedby"`)
-        .type('text/markdown').send(renderMarkdown({ path, post, page, ...result, origin }));
+        .type('text/markdown').send(renderMarkdown({ path, post, page, ...result, origin, ...(path === '/' && { openCode: await getOpenCode() }) }));
     } catch {
       res.status(503).set({ 'Cache-Control': 'no-store', 'Retry-After': '60' }).type('text/plain').send('VoiceLK content temporarily unavailable.');
     }
@@ -94,7 +96,7 @@ export function createSeoRouter({ findPost, listPosts, sitemapPosts, getTemplate
         status = 404;
       }
       const meta = pageMetadata({ path, post, status, page: isPostListing(path) ? page : 1, filtered, preview, origin });
-      const content = renderPublicContent({ path, post, posts, page: path === '/' ? 1 : page, hasMore: path === '/' ? false : hasMore, status });
+      const content = renderPublicContent({ path, post, posts, ...(path === '/' && { openCode: await getOpenCode() }), page: path === '/' ? 1 : page, hasMore: path === '/' ? false : hasMore, status });
       const html = renderDocument(await getTemplate(), meta, content);
       if (meta.noIndex) res.set('X-Robots-Tag', 'noindex, follow');
       // No shared HTML cache: unpublishing must immediately remove article content.

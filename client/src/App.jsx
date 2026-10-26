@@ -20,6 +20,7 @@ const PostEditor = lazy(() => import('./admin/editor/PostEditor.jsx'));
 const Subscribers = lazy(() => import('./admin/Subscribers.jsx'));
 const Messages = lazy(() => import('./admin/Messages.jsx'));
 const Bloggers = lazy(() => import('./admin/Bloggers.jsx'));
+const OpenCode = lazy(() => import('./admin/OpenCode.jsx'));
 const WriterRoot = lazy(() => import('./write/WriterRoot.jsx'));
 const WriterLogin = lazy(() => import('./write/WriterLogin.jsx'));
 const WriterLayout = lazy(() => import('./write/WriterLayout.jsx'));
@@ -95,6 +96,7 @@ const router = createBrowserRouter([
               { path: 'subscribers', element: <Subscribers /> },
               { path: 'messages', element: <Messages /> },
               { path: 'bloggers', element: <Bloggers /> },
+              { path: 'open-code', element: <OpenCode /> },
             ],
           },
         ],

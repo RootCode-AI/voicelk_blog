@@ -1,8 +1,10 @@
+import { useOpenCode } from '../context/OpenCodeContext.jsx';
 import { Link } from 'react-router';
 import { site } from '../site.config.js';
 import { Logo } from './Navbar.jsx';
 
 export default function Footer() {
+  const { repos } = useOpenCode();
   return (
     <footer className="border-t border-line">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
@@ -25,11 +27,11 @@ export default function Footer() {
             <li><Link to="/terms" className="text-slate hover:text-ink">Terms of Use</Link></li>
           </ul>
         </div>
-        <div>
+        {repos.length > 0 && <div>
           <p className="eyebrow mb-3">Code</p>
           <ul className="space-y-2 text-sm">
-            {site.repos.map((r) => (
-              <li key={r.name}>
+            {repos.map((r) => (
+              <li key={r.id}>
                 {r.url ? (
                   <a href={r.url} target="_blank" rel="noreferrer" className="text-slate hover:text-ink">
                     {r.label}
@@ -40,7 +42,7 @@ export default function Footer() {
               </li>
             ))}
           </ul>
-        </div>
+        </div>}
       </div>
       <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-2 px-4 pb-8 text-xs text-muted sm:px-6">
         <span>© {new Date().getFullYear()} {site.name} team</span>

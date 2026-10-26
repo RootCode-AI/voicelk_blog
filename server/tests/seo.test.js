@@ -450,3 +450,23 @@ test('the inline boot script is allowed by its exact hash, and nothing else inli
   assert.ok(app.includes(`BOOT_SCRIPT_HASH = "${hash}"`), `app.js must allow ${hash}`);
   assert.match(app, /scriptSrc: \["'self'", BOOT_SCRIPT_HASH\]/);
 });
+
+test('saved Open code cards appear consistently in initial HTML, Markdown and the LLM guide', async () => {
+  const openCode = { enabled: true, repos: [{ id: 'custom', name: 'custom_repo', label: 'Custom source title',
+    description: '<script>alert(1)</script>', stack: 'JavaScript', url: 'https://github.com/example/source' }] };
+  await withServer({ getOpenCode: async () => openCode }, async base => {
+    for (const path of ['/', '/index.md', '/llms.txt']) {
+      const html = await (await fetch(base + path)).text();
+      assert.match(html, /Custom source title/);
+      assert.match(html, /https:\/\/github.com\/example\/source/);
+      assert.doesNotMatch(html, /voicelk_ml/);
+      assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/);
+    }
+    openCode.enabled = false;
+    openCode.repos = [];
+    for (const path of ['/', '/index.md', '/llms.txt']) {
+      const html = await (await fetch(base + path)).text();
+      assert.doesNotMatch(html, /Custom source title|voicelk_ml/);
+    }
+  });
+});
