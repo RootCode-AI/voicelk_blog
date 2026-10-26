@@ -23,7 +23,8 @@
     "delete-admin": "npm run delete-admin -w server --",
     "create-blogger": "npm run create-blogger -w server --",
     "create-evaluator": "npm run create-evaluator -w server --",
-    "db:setup": "npm run db:setup -w server"
+    "db:setup": "npm run db:setup -w server",
+    "test:open-code": "node --test server/tests/openCode.test.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",

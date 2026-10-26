@@ -1,3 +1,4 @@
+import { DEFAULT_OPEN_CODE, publicOpenCode } from '../../../shared/openCode.js';
 import { seoSite, absoluteUrl } from '../../../shared/seo.js';
 import { site } from '../../../client/src/site.config.js';
 import { parseCsv } from '../../../client/src/lib/csv.js';
@@ -13,7 +14,12 @@ const fence = (value, language = '') => {
   return `${delimiter}${language.replace(/[^a-z0-9+-]/gi, '')}\n${source}\n${delimiter}`;
 };
 
-export function renderLlms(posts, origin = seoSite.url) {
+function repositoryMarkdown(openCode) {
+  return openCode.enabled && openCode.repos.length ? ['## Open code',
+    ...openCode.repos.map(repo => `- ${repo.url ? link(repo.label, repo.url.replace(/\(/g, '%28').replace(/\)/g, '%29')) : text(repo.label)}: ${text(repo.description)}${repo.stack ? ` (${text(repo.stack)})` : ''}`)] : [];
+}
+
+export function renderLlms(posts, origin = seoSite.url, openCode = publicOpenCode(DEFAULT_OPEN_CODE)) {
   return [
     `# ${seoSite.name}`, `> ${seoSite.description}`,
     `VoiceLK is a Sinhala-English text-to-speech product developed from research at ${site.university}. Journey covers product development; Research documents the findings behind the product. Cite individual articles using their canonical HTML URLs.`,
@@ -21,6 +27,7 @@ export function renderLlms(posts, origin = seoSite.url) {
     '## Product',
     ...Object.values(postSections).map((section) => `- ${link(section.label, `${origin}${section.path}.md`)}: ${section.description}`),
     `- ${link('Product overview', `${origin}/index.md`)}: Product overview and speech pipeline.\n- ${link('About VoiceLK', `${origin}/about.md`)}: Product background.\n- ${link('Product updates', `${origin}/blog.md`)}: Published notes and pagination.`,
+    ...repositoryMarkdown(openCode),
     '## Recent updates',
     posts.length ? posts.slice(0, 30).map((post) => `- ${link(post.title || post.slug, postUrl(post, origin))}: ${text(post.excerpt || 'Published VoiceLK update.')}`).join('\n') : 'No updates have been published yet.',
     '## Optional',
@@ -59,7 +66,7 @@ function blockMarkdown({ type, data: d = {} }, origin) {
   }
 }
 
-export function renderMarkdown({ path, post, posts = [], page = 1, hasMore = false, origin = seoSite.url }) {
+export function renderMarkdown({ path, post, posts = [], page = 1, hasMore = false, origin = seoSite.url, openCode = publicOpenCode(DEFAULT_OPEN_CODE) }) {
   const canonical = absoluteUrl(`${path}${isPostListing(path) && page > 1 ? `?page=${page}` : ''}`, origin);
   const source = `Canonical HTML: ${canonical}`;
   if (publicPages[path]) {
@@ -85,6 +92,7 @@ export function renderMarkdown({ path, post, posts = [], page = 1, hasMore = fal
   return [
     `# ${path === '/about' ? 'About VoiceLK' : seoSite.name}`, source, seoSite.description,
     `A text-to-speech product developed from research at ${site.university}.`,
+    ...(path === '/' ? repositoryMarkdown(openCode) : []),
     '## How VoiceLK works', ...site.pipeline.map((step) => `### ${step.title}\n\n${step.body}`),
     ...(site.team.length ? ['## Team', ...site.team.map((member) => `${text(member.name)} — ${text(member.role)}`)] : []),
     `## Product updates\n\n${link('Read published notes', `${origin}/blog.md`)}`,

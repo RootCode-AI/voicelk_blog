@@ -1,3 +1,5 @@
+import { publicOpenCodeRoutes, adminOpenCodeRoutes } from './routes/openCode.js';
+import { readPublicOpenCode } from './lib/openCode.js';
 import express from 'express';
 import compression from 'compression';
 import fs from 'node:fs';
@@ -120,6 +122,8 @@ app.get('/api/admin/stats', requireAdmin, async (_req, res) => {
   res.json({ published, drafts, subscribers, pending, mail: mailMode });
 });
 
+app.use('/api/open-code', publicOpenCodeRoutes);
+app.use('/api/admin/open-code', adminOpenCodeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/admin/posts', requireAdmin, adminPostRoutes);
@@ -147,6 +151,7 @@ if (fs.existsSync(clientDist)) {
 }
 app.get('/index.html', (_req, res) => res.redirect(308, '/'));
 app.use(createSeoRouter({
+  async getOpenCode() { await initializeApp(); return readPublicOpenCode(); },
   async findPost(slug) {
     await initializeApp();
     return Post.findOne({ slug, status: 'published' }).lean();

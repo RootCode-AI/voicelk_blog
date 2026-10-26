@@ -1,3 +1,4 @@
+import { DEFAULT_OPEN_CODE, publicOpenCode } from '../../../shared/openCode.js';
 // Readable initial HTML for every visitor, enhanced by the React application.
 // Keep these snapshots sourced from the same post blocks and site configuration.
 import { createElement as h } from 'react';
@@ -52,7 +53,7 @@ function postLinks(posts) {
     post.excerpt && h('p', null, post.excerpt))));
 }
 
-export function renderPublicContent({ path, post, posts = [], page = 1, hasMore = false, status = 200 }) {
+export function renderPublicContent({ path, post, posts = [], page = 1, hasMore = false, status = 200, openCode = publicOpenCode(DEFAULT_OPEN_CODE) }) {
   let body;
   if (status === 404) {
     body = h('section', null, h('h1', null, 'Nothing to hear here.'), h('p', null, 'That page does not exist, or the note has been unpublished.'), h('a', { href: '/research' }, 'Read the research'), ' · ', h('a', { href: '/' }, 'Go to homepage'));
@@ -87,5 +88,11 @@ export function renderPublicContent({ path, post, posts = [], page = 1, hasMore 
   return renderToStaticMarkup(h('main', { className: 'seo-document' },
     h('nav', { 'aria-label': 'Main navigation' }, h('a', { href: '/' }, 'VoiceLK'), ' · ',
       h('a', { href: '/journey' }, 'Journey'), ' · ', h('a', { href: '/research' }, 'Read the research'), ' · ', h('a', { href: '/about' }, 'About')),
-    body, h('footer', null, h('a', { href: '/faq' }, 'FAQ'), ' · ', h('a', { href: '/privacy' }, 'Privacy Policy'), ' · ', h('a', { href: '/terms' }, 'Terms of Use'))));
+    body,
+    path === '/' && openCode.enabled && openCode.repos.length > 0 && h('section', null,
+      h('p', null, 'Open code'), h('h2', null, 'Read the source'),
+      ...openCode.repos.map(repo => h('article', { key: repo.id },
+        h('p', null, repo.name), h('h3', null, repo.url ? h('a', { href: repo.url }, repo.label) : repo.label),
+        h('p', null, repo.description), h('p', null, repo.stack), !repo.url && h('p', null, 'Link coming soon')))),
+    h('footer', null, h('a', { href: '/faq' }, 'FAQ'), ' · ', h('a', { href: '/privacy' }, 'Privacy Policy'), ' · ', h('a', { href: '/terms' }, 'Terms of Use'))));
 }

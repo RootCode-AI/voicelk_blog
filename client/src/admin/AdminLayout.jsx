@@ -1,12 +1,13 @@
 import { Suspense } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router';
-import { AudioLines, ExternalLink, FileText, Inbox, LogOut, PenLine, Plus, Users } from 'lucide-react';
+import { AudioLines, ExternalLink, FileText, FolderGit2, Inbox, LogOut, PenLine, Plus, Users } from 'lucide-react';
 import { Logo } from '../components/Navbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { usePostScope } from './editor/scope.js';
 
 const nav = [
   { to: '/admin', label: 'Posts', icon: FileText, end: true },
+  { to: '/admin/open-code', label: 'Open code', icon: FolderGit2 },
   { to: '/admin/subscribers', label: 'Subscribers', icon: Users },
   { to: '/admin/messages', label: 'Messages', icon: Inbox },
   { to: '/admin/bloggers', label: 'Bloggers', icon: PenLine },

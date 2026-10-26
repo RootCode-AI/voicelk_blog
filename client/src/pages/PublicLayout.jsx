@@ -1,3 +1,4 @@
+import { OpenCodeProvider } from '../context/OpenCodeContext.jsx';
 import { Suspense } from 'react';
 import { Outlet } from 'react-router';
 import Footer from '../components/Footer.jsx';
@@ -6,7 +7,7 @@ import SmoothScroll from '../components/motion/SmoothScroll.jsx';
 
 export default function PublicLayout() {
   return (
-    <>
+    <OpenCodeProvider>
       <Navbar />
       <SmoothScroll>
         <main className="min-h-[100dvh]">
@@ -16,6 +17,6 @@ export default function PublicLayout() {
         </main>
         <Footer />
       </SmoothScroll>
-    </>
+    </OpenCodeProvider>
   );
 }

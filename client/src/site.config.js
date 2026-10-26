@@ -1,7 +1,4 @@
-// Product information shared across the website.
-// Fill in the repository links and team once they are ready — cards with an
-// empty url render as "link coming soon" instead of a dead link.
-
+// Shared product information; repository cards are managed in Admin > Open code.
 import { seoSite } from '../../shared/seo.js';
 
 export const site = {
@@ -17,36 +14,7 @@ export const site = {
   university: 'Rajarata University of Sri Lanka',
   contactEmail: 'rootcode.projects@gmail.com',
 
-  repos: [
-    {
-      name: 'voicelk_ml',
-      label: 'Speech engine',
-      description: 'Text normalisation, code-switched G2P, VITS training and evaluation.',
-      stack: 'Python · PyTorch',
-      url: '',
-    },
-    {
-      name: 'bridge',
-      label: 'TTS bridge',
-      description: 'The microservice that serves the trained checkpoints over HTTP.',
-      stack: 'Python · FastAPI',
-      url: '',
-    },
-    {
-      name: 'voicelk_be',
-      label: 'Application backend',
-      description: 'Auth, questions, answers and the stored audio records.',
-      stack: 'Java · Spring Boot',
-      url: '',
-    },
-    {
-      name: 'voicelk_fe',
-      label: 'Web client',
-      description: 'The React app people use to ask questions and hear the answers.',
-      stack: 'React · Vite · Tailwind',
-      url: '',
-    },
-  ],
+
 
   pipeline: [
     {

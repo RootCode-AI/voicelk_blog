@@ -386,3 +386,24 @@ recrawl, and decides the displayed name and ranking.
 
 References: [Google site names](https://developers.google.com/search/docs/appearance/site-names)
 and [requesting a recrawl](https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl).
+
+### Manage Open code
+
+Open **Admin > Open code** (`/admin/open-code`) to manage the homepage's
+**Read the source** cards and footer repository links. Edit repository names,
+display titles, descriptions, tech stacks and URLs. Add or remove cards, move them
+up/down, hide individual entries, or turn off the whole section. A blank URL shows
+**Link coming soon**. Changes go live only when **Save changes** succeeds.
+
+Settings are stored in the existing MongoDB database. The four original cards are
+used until the first save; an intentionally empty saved list stays empty. No
+manual migration is needed. A stale save is rejected if another administrator has
+updated the section; reload before editing again. Only administrators can read
+editable settings or save changes. Public responses omit hidden entries.
+
+The homepage, footer, server-rendered homepage, `/index.md` and `/llms.txt` use the
+same saved content. Newly loaded public pages reflect saved updates without a
+rebuild. This manages repository links, not the repositories or their code.
+
+Validation: `npm run test:open-code`, `npm run test:seo`, and
+`npx playwright test client/tests/openCode.spec.js` after `npm run build`.
