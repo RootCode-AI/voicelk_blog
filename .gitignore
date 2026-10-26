@@ -14,3 +14,9 @@ client/public/apple-touch-icon.png
 client/public/site.webmanifest
 test-results/
 playwright-report/
+RESULTS.md
+
+.gitignore
+assets/results-speaker-02/*
+scripts/build_results_figures.py
+assets/covers/*
